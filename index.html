@@ -369,6 +369,7 @@
 
   <div class="savebar">
     <button class="btn btn-ghost" id="openHistory" aria-label="履歴">📅</button>
+    <button class="btn btn-ghost" id="sendNotion" aria-label="Notionに送る">☁</button>
     <button class="btn btn-primary" id="save">保存</button>
   </div>
 
@@ -623,6 +624,49 @@
     const url=URL.createObjectURL(blob); const a=document.createElement("a");
     a.href=url; a.download=`diary-export-${todayKey()}.json`; a.click(); URL.revokeObjectURL(url);
   });
+
+  // ----- send to Notion (reuse briefing app's existing endpoint + passphrase) -----
+  const NOTES_API = "https://briefing.theneuralpeach.deno.net";
+  const HABIT_NAMES = {water:"水2L+",workout:"Workout",out:"外出",walk:"散歩",intimacy:"Intimacy"};
+  function composeNote(k,e){
+    const L=["【Daily】"+k];
+    if(e.moods&&e.moods.length){
+      const ms=e.moods.map(f=>{ const fam=WHEEL.find(w=>w.levels.indexOf(f)>=0); const ja=fam?fam.levelsJa[fam.levels.indexOf(f)]:""; return f+(ja?"("+ja+")":""); });
+      L.push("気分: "+ms.join(" / "));
+    }
+    const wl=[];
+    if(e.sleep!=null) wl.push("睡眠"+e.sleep+"h");
+    if(e.energy) wl.push("エネルギー"+e.energy+"/5");
+    if(wl.length) L.push(wl.join(" ・ "));
+    const hs=Object.keys(e.habits||{}).filter(h=>e.habits[h]).map(h=>HABIT_NAMES[h]||h);
+    if(hs.length) L.push("習慣: "+hs.join(" / "));
+    if(e.meds) L.push("服用: "+(e.medsTime?e.medsTime+" ":"")+"服用した");
+    if(e.diary) L.push("日記: "+e.diary);
+    return L.join("\n");
+  }
+  function getSecret(){
+    let s=localStorage.getItem("bpass");
+    if(!s){ s=prompt("Notion送信の合言葉（briefingアプリと同じ）"); if(s) localStorage.setItem("bpass",s); }
+    return s;
+  }
+  function sendToNotion(){
+    persist();
+    const e=getEntry(current);
+    const has=e.moods.length||e.sleep!=null||e.energy||e.meds||e.diary||Object.values(e.habits||{}).some(Boolean);
+    if(!has){ flash("この日は記録がないよ"); return; }
+    const secret=getSecret();
+    if(!secret){ flash("合言葉が必要だよ"); return; }
+    flash("送信中…");
+    fetch(NOTES_API,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({note:composeNote(current,e),kind:"diary",secret:secret})})
+      .then(r=>{
+        if(r.ok){ flash("Notionに送ったよ ✓"); }
+        else if(r.status===401||r.status===403){ localStorage.removeItem("bpass"); flash("合言葉が違うかも"); }
+        else { flash("送信エラー("+r.status+")"); }
+      })
+      .catch(()=>flash("送信失敗（オフライン？）"));
+  }
+  $("sendNotion").addEventListener("click",sendToNotion);
 
   // ----- swipe nav -----
   let tx=0;
