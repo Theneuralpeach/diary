@@ -163,6 +163,20 @@
   .intents-list li{font-size:15px;line-height:1.6;margin-bottom:10px;padding-left:30px;position:relative;}
   .intents-list li::before{counter-increment:i;content:counter(i);position:absolute;left:0;top:0;width:21px;height:21px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600;display:grid;place-items:center;}
 
+  /* ---------- glossary (emotion translations) ---------- */
+  .glossary .gloss-head{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;}
+  .glossary .gloss-head .label{margin-bottom:0;}
+  .glossary.collapsed .gloss-body{display:none;}
+  .glossary.collapsed .chev{transform:rotate(-90deg);}
+  .gloss-note{font-size:11px;color:var(--faint);margin:12px 0 2px;}
+  .gloss-fam{display:flex;align-items:center;gap:8px;margin-top:15px;}
+  .gloss-fam .sw{width:11px;height:11px;border-radius:50%;flex:none;}
+  .gloss-fam .g-en{font-size:14px;font-weight:600;color:var(--text);}
+  .gloss-fam .g-ja{font-size:13px;color:var(--muted);}
+  .gloss-lvls{font-size:12.5px;color:var(--muted);margin-top:5px;padding-left:19px;line-height:1.8;}
+  .gloss-lvls b{color:var(--text);font-weight:500;}
+  .gloss-lvls .sep{opacity:.35;margin:0 6px;}
+
   /* ---------- surgery counter ---------- */
   .surgery{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:13px;padding:8px 0 2px;}
   .surgery .s-emoji{font-size:15px;}
@@ -339,6 +353,18 @@
     </div>
   </div>
 
+  <!-- emotion glossary (EN→JA) -->
+  <div class="card glossary collapsed" id="glossary">
+    <div class="gloss-head" id="glossHead">
+      <div class="label">📖 感情の意味（日本語）</div>
+      <span class="chev">▾</span>
+    </div>
+    <div class="gloss-body">
+      <div class="gloss-note">中心ほど強い → 外ほどやわらか（強 → 弱）</div>
+      <div id="glossList"></div>
+    </div>
+  </div>
+
   <div class="saved-flash" id="flash">保存しました</div>
 
   <div class="savebar">
@@ -374,14 +400,14 @@
   // ----- wheel of emotions (Plutchik) : 8 families x 3 intensities -----
   // levels = [intense(inner), base(mid), mild(outer)]
   const WHEEL = [
-    { family:"Joy",          tone:"pos",  color:"#F2C94C", levels:["Ecstasy","Joy","Serenity"] },
-    { family:"Trust",        tone:"pos",  color:"#9CCC5A", levels:["Admiration","Trust","Acceptance"] },
-    { family:"Fear",         tone:"hard", color:"#46A86B", levels:["Terror","Fear","Apprehension"] },
-    { family:"Surprise",     tone:"calm", color:"#46B6D9", levels:["Amazement","Surprise","Distraction"] },
-    { family:"Sadness",      tone:"hard", color:"#5C7CDA", levels:["Grief","Sadness","Pensiveness"] },
-    { family:"Disgust",      tone:"hard", color:"#9A6FC7", levels:["Loathing","Disgust","Boredom"] },
-    { family:"Anger",        tone:"hard", color:"#E2554C", levels:["Rage","Anger","Annoyance"] },
-    { family:"Anticipation", tone:"pos",  color:"#F0922E", levels:["Vigilance","Anticipation","Interest"] }
+    { family:"Joy",          ja:"喜び",   tone:"pos",  color:"#F2C94C", levels:["Ecstasy","Joy","Serenity"],          levelsJa:["恍惚","喜び","平穏"] },
+    { family:"Trust",        ja:"信頼",   tone:"pos",  color:"#9CCC5A", levels:["Admiration","Trust","Acceptance"],   levelsJa:["敬愛","信頼","容認"] },
+    { family:"Fear",         ja:"恐れ",   tone:"hard", color:"#46A86B", levels:["Terror","Fear","Apprehension"],      levelsJa:["恐怖","恐れ","不安"] },
+    { family:"Surprise",     ja:"驚き",   tone:"calm", color:"#46B6D9", levels:["Amazement","Surprise","Distraction"],levelsJa:["驚嘆","驚き","放心"] },
+    { family:"Sadness",      ja:"悲しみ", tone:"hard", color:"#5C7CDA", levels:["Grief","Sadness","Pensiveness"],     levelsJa:["悲嘆","悲しみ","憂い"] },
+    { family:"Disgust",      ja:"嫌悪",   tone:"hard", color:"#9A6FC7", levels:["Loathing","Disgust","Boredom"],      levelsJa:["強い嫌悪","嫌悪","退屈"] },
+    { family:"Anger",        ja:"怒り",   tone:"hard", color:"#E2554C", levels:["Rage","Anger","Annoyance"],          levelsJa:["激怒","怒り","苛立ち"] },
+    { family:"Anticipation", ja:"期待",   tone:"pos",  color:"#F0922E", levels:["Vigilance","Anticipation","Interest"],levelsJa:["警戒","期待","関心"] }
   ];
   const TONE_OF = {};
   WHEEL.forEach(f => f.levels.forEach(l => TONE_OF[l] = f.tone));
@@ -608,6 +634,21 @@
     if(dx>0){ persist(); current=shiftKey(current,-1); renderAll(); }
     else if(current<todayKey()){ persist(); current=shiftKey(current,1); renderAll(); }
   },{passive:true});
+
+  // ----- emotion glossary (EN -> JA) -----
+  (function buildGlossary(){
+    $("glossList").innerHTML = WHEEL.map(f=>{
+      const lv = f.levels.map((l,i)=>`<b>${l}</b> ${f.levelsJa[i]}`).join('<span class="sep">·</span>');
+      return `<div class="gloss-fam"><span class="sw" style="background:${f.color}"></span>`+
+             `<span class="g-en">${f.family}</span><span class="g-ja">${f.ja}</span></div>`+
+             `<div class="gloss-lvls">${lv}</div>`;
+    }).join("");
+  })();
+  if(localStorage.getItem("diary.glossOpen")==="1") $("glossary").classList.remove("collapsed");
+  $("glossHead").addEventListener("click",()=>{
+    const c=$("glossary").classList.toggle("collapsed");
+    localStorage.setItem("diary.glossOpen", c?"0":"1");
+  });
 
   // ----- intentions collapse -----
   const intentOpen = localStorage.getItem("diary.intentOpen");
