@@ -145,6 +145,31 @@
   textarea:focus{outline:none;border-color:var(--accent);}
   textarea::placeholder{color:var(--faint);}
 
+  /* ---------- new moon intentions ---------- */
+  .intentions{border-color:#3a2f44;background:linear-gradient(180deg,#221b25,#1c1815);}
+  .intent-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;cursor:pointer;}
+  .intent-head .label{margin-bottom:2px;}
+  .chev{color:var(--accent);font-size:13px;margin-top:3px;transition:.2s;flex:none;}
+  .intentions.collapsed .intent-body{display:none;}
+  .intentions.collapsed .chev{transform:rotate(-90deg);}
+  .intent-body{margin-top:4px;}
+  .intent-block{margin-top:16px;}
+  .intent-block .q{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:7px;}
+  .intent-block .a{font-size:15px;line-height:1.65;color:var(--text);}
+  .intent-block .a.serif{font-family:"DM Serif Display",serif;font-size:18px;line-height:1.5;}
+  .a.transform{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+  .a.transform .old{color:var(--faint);text-decoration:line-through;}
+  .a.transform .arrow{color:var(--accent);}
+  .a.transform .newword{color:var(--good);font-weight:600;}
+  .intents-list{margin:6px 0 0;padding-left:0;list-style:none;counter-reset:i;}
+  .intents-list li{font-size:15px;line-height:1.6;margin-bottom:10px;padding-left:30px;position:relative;}
+  .intents-list li::before{counter-increment:i;content:counter(i);position:absolute;left:0;top:0;width:21px;height:21px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600;display:grid;place-items:center;}
+
+  /* ---------- surgery counter ---------- */
+  .surgery{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:13px;padding:8px 0 2px;}
+  .surgery .s-emoji{font-size:15px;}
+  .surgery b{color:var(--text);font-weight:600;}
+
   /* ---------- save bar ---------- */
   .savebar{
     position:fixed;left:0;right:0;bottom:0;padding:12px 18px calc(12px + var(--safe-bot));
@@ -268,7 +293,51 @@
   <!-- diary -->
   <div class="card">
     <div class="label">ひとこと日記</div>
-    <textarea id="diary" placeholder="きょう何があった？どう感じた？"></textarea>
+    <div class="hint">① 今日何した？どんな小さいことでも。「このアイデア誰かに話した」でもOK</div>
+    <textarea id="diary" placeholder="記録する。発信じゃなくて、記録。"></textarea>
+  </div>
+
+  <!-- new moon intentions -->
+  <div class="card intentions" id="intentions">
+    <div class="intent-head" id="intentHead">
+      <div>
+        <div class="label">🌑 新月に決めたこと</div>
+        <div class="hint" style="margin:0;">2026.6.15 New Moon</div>
+      </div>
+      <span class="chev" id="intentChev">▾</span>
+    </div>
+    <div class="intent-body">
+      <div class="intent-block">
+        <div class="q">1年後の自分</div>
+        <div class="a serif">私はアイデアを生み出し、仕組みを使って形にするビジネスオーナーです</div>
+      </div>
+      <div class="intent-block">
+        <div class="q">本当にやりたいこと</div>
+        <div class="a">AIと新しいテクノロジーを使って、人のビジネスと生活を変えるプロダクトとサービスを作り続けること</div>
+      </div>
+      <div class="intent-block">
+        <div class="q">手放す言葉 → 新しい言葉</div>
+        <div class="a transform">
+          <span class="old">私はまだ準備ができていない</span>
+          <span class="arrow">→</span>
+          <span class="newword">やっとできた！</span>
+        </div>
+      </div>
+      <div class="intent-block">
+        <div class="q">3つの意図</div>
+        <ol class="intents-list">
+          <li>AI自動化サービスの形を決めて、テストする</li>
+          <li>デジタルプロダクト2本目を出す</li>
+          <li>作ったものを記録する。発信じゃなくて、記録。</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- surgery counter -->
+  <div class="surgery" id="surgery">
+    <span class="s-emoji">🩹</span>
+    <span id="surgeryText">手術から —</span>
   </div>
 
   <div class="saved-flash" id="flash">保存しました</div>
@@ -330,6 +399,7 @@
   function shiftKey(k,delta){ const dt=keyToDate(k); dt.setDate(dt.getDate()+delta); return dayKeyFromDate(new Date(dt.getTime()+5*3600*1000)); }
 
   const DOW = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+  const SURGERY = "2026-02-06";
   let current = todayKey();
 
   // ----- entry model -----
@@ -369,6 +439,17 @@
     if(current === todayKey()){ pill.textContent="今日"; pill.classList.add("is-today"); }
     else { pill.textContent=dt.getFullYear()+"年"; pill.classList.remove("is-today"); }
     $("next").disabled = current >= todayKey();
+    renderSurgery();
+  }
+  function renderSurgery(){
+    const days = Math.round((keyToDate(current) - keyToDate(SURGERY)) / 86400000);
+    const el = $("surgeryText");
+    if(days < 0){ $("surgery").style.display="none"; return; }
+    $("surgery").style.display="flex";
+    if(days === 0){ el.innerHTML = "手術当日"; return; }
+    const w = Math.floor(days/7), r = days%7;
+    const wk = w>0 ? `（${w}週間${r>0?r+"日":""}）` : "";
+    el.innerHTML = `手術から <b>${days}日</b>${wk}`;
   }
   function renderEntry(){
     document.querySelectorAll(".feel").forEach(el=>el.classList.toggle("on", entry.moods.indexOf(el.dataset.f)>=0));
@@ -484,6 +565,14 @@
     if(dx>0){ persist(); current=shiftKey(current,-1); renderAll(); }
     else if(current<todayKey()){ persist(); current=shiftKey(current,1); renderAll(); }
   },{passive:true});
+
+  // ----- intentions collapse -----
+  const intentOpen = localStorage.getItem("diary.intentOpen");
+  if(intentOpen === "0") $("intentions").classList.add("collapsed");
+  $("intentHead").addEventListener("click",()=>{
+    const c = $("intentions").classList.toggle("collapsed");
+    localStorage.setItem("diary.intentOpen", c ? "0" : "1");
+  });
 
   // ----- init -----
   renderAll();
