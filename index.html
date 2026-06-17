@@ -67,20 +67,18 @@
   .card .label{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
   .card .hint{font-size:12px;color:var(--faint);margin-bottom:14px;}
 
-  /* ---------- mood (multi-select feelings) ---------- */
-  .feel-group{margin-top:14px;}
-  .feel-group:first-of-type{margin-top:4px;}
-  .feel-group .g-label{font-size:11px;letter-spacing:.5px;color:var(--faint);margin-bottom:9px;}
-  .feels{display:flex;flex-wrap:wrap;gap:8px;}
-  .feel{
-    padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);
-    color:var(--muted);font-size:14px;cursor:pointer;transition:.13s;
-  }
-  .feel:active{transform:scale(.93);}
-  .feel.on{color:var(--text);}
-  .feel.on[data-tone="pos"]{background:var(--good-soft);border-color:var(--good);}
-  .feel.on[data-tone="calm"]{background:var(--accent-soft);border-color:var(--accent);}
-  .feel.on[data-tone="hard"]{background:var(--low-soft);border-color:var(--low);}
+  /* ---------- mood (wheel of emotions) ---------- */
+  .wheel-wrap{display:flex;justify-content:center;margin:8px 0 2px;}
+  #wheel{width:100%;max-width:330px;height:auto;touch-action:manipulation;}
+  .wedge{cursor:pointer;stroke:var(--bg);stroke-width:1.4;transition:fill-opacity .12s,stroke-width .1s;}
+  .wedge:active{stroke:#fff;}
+  .wedge.sel{stroke:#fff;stroke-width:2.6;}
+  .wlabel{font-size:8.5px;fill:#fff;opacity:.95;pointer-events:none;font-weight:600;}
+  .wlabel.lvl{font-size:7px;opacity:.78;font-weight:400;}
+  .mood-sel{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+  .mood-sel:empty{display:none;}
+  .msel{padding:5px 11px;border-radius:999px;font-size:13px;border:1px solid;display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.04);}
+  .msel .x{opacity:.55;font-size:14px;line-height:1;}
 
   /* ---------- wellness ---------- */
   .row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
@@ -229,11 +227,12 @@
     <button class="navbtn" id="next" aria-label="次の日">›</button>
   </div>
 
-  <!-- mood -->
+  <!-- mood: wheel of emotions -->
   <div class="card">
-    <div class="label">きょうの気分</div>
-    <div class="hint">あてはまる気持ちを何個でも</div>
-    <div id="feels"></div>
+    <div class="label">きょうの気分 · 感情の輪</div>
+    <div class="hint">あてはまる気持ちをタップ（中心ほど強い／外ほどやわらか）。何個でも</div>
+    <div class="wheel-wrap"><svg id="wheel" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" aria-label="感情の輪"></svg></div>
+    <div class="mood-sel" id="moodSel"></div>
   </div>
 
   <!-- wellness -->
@@ -297,6 +296,12 @@
     <textarea id="diary" placeholder="記録する。発信じゃなくて、記録。"></textarea>
   </div>
 
+  <!-- surgery counter -->
+  <div class="surgery" id="surgery">
+    <span class="s-emoji">🩹</span>
+    <span id="surgeryText">手術から —</span>
+  </div>
+
   <!-- new moon intentions -->
   <div class="card intentions" id="intentions">
     <div class="intent-head" id="intentHead">
@@ -334,12 +339,6 @@
     </div>
   </div>
 
-  <!-- surgery counter -->
-  <div class="surgery" id="surgery">
-    <span class="s-emoji">🩹</span>
-    <span id="surgeryText">手術から —</span>
-  </div>
-
   <div class="saved-flash" id="flash">保存しました</div>
 
   <div class="savebar">
@@ -372,14 +371,28 @@
   "use strict";
   const KEY = "diaryTracker.v1";
 
-  // ----- feeling vocabulary (grouped, multi-select) -----
-  const FEELINGS = [
-    { tone:"pos",  label:"ポジティブ", items:["嬉しい","楽しい","わくわく","元気","自信","感謝","愛されてる"] },
-    { tone:"calm", label:"おだやか",   items:["穏やか","リラックス","満たされた","すっきり","普通"] },
-    { tone:"hard", label:"しんどい",   items:["疲れた","不安","ストレス","イライラ","落ち込み","悲しい","寂しい","焦り","無気力","怒り"] }
+  // ----- wheel of emotions (Plutchik) : 8 families x 3 intensities -----
+  // levels = [intense(inner), base(mid), mild(outer)]
+  const WHEEL = [
+    { family:"喜び",   tone:"pos",  color:"#F2C94C", levels:["恍惚","喜び","平穏"] },
+    { family:"信頼",   tone:"pos",  color:"#9CCC5A", levels:["敬愛","信頼","容認"] },
+    { family:"恐れ",   tone:"hard", color:"#46A86B", levels:["恐怖","恐れ","不安"] },
+    { family:"驚き",   tone:"calm", color:"#46B6D9", levels:["驚嘆","驚き","放心"] },
+    { family:"悲しみ", tone:"hard", color:"#5C7CDA", levels:["悲嘆","悲しみ","憂い"] },
+    { family:"嫌悪",   tone:"hard", color:"#9A6FC7", levels:["強い嫌悪","嫌悪","退屈"] },
+    { family:"怒り",   tone:"hard", color:"#E2554C", levels:["激怒","怒り","苛立ち"] },
+    { family:"期待",   tone:"pos",  color:"#F0922E", levels:["警戒","期待","関心"] }
   ];
   const TONE_OF = {};
-  FEELINGS.forEach(g => g.items.forEach(it => TONE_OF[it] = g.tone));
+  WHEEL.forEach(f => f.levels.forEach(l => TONE_OF[l] = f.tone));
+
+  function polar(cx,cy,r,deg){ const a=deg*Math.PI/180; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; }
+  function sectorPath(cx,cy,rIn,rOut,a0,a1){
+    const p0=polar(cx,cy,rOut,a0),p1=polar(cx,cy,rOut,a1),p2=polar(cx,cy,rIn,a1),p3=polar(cx,cy,rIn,a0);
+    const lg=(a1-a0)>180?1:0;
+    return `M${p0[0].toFixed(2)} ${p0[1].toFixed(2)} A${rOut} ${rOut} 0 ${lg} 1 ${p1[0].toFixed(2)} ${p1[1].toFixed(2)} `+
+           `L${p2[0].toFixed(2)} ${p2[1].toFixed(2)} A${rIn} ${rIn} 0 ${lg} 0 ${p3[0].toFixed(2)} ${p3[1].toFixed(2)} Z`;
+  }
 
   // ----- storage -----
   function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
@@ -414,21 +427,51 @@
 
   const $ = id => document.getElementById(id);
 
-  // ----- build feeling chips once -----
-  (function buildFeels(){
-    const wrap = $("feels");
-    wrap.innerHTML = FEELINGS.map(g => `
-      <div class="feel-group">
-        <div class="g-label">${g.label}</div>
-        <div class="feels">${g.items.map(it=>`<div class="feel" data-tone="${g.tone}" data-f="${it}">${it}</div>`).join("")}</div>
-      </div>`).join("");
-    wrap.querySelectorAll(".feel").forEach(el=>el.addEventListener("click",()=>{
-      const f = el.dataset.f;
-      const i = entry.moods.indexOf(f);
+  // ----- build wheel once -----
+  (function buildWheel(){
+    const cx=170, cy=170, bands=[48,88,124,160], ops=[0.95,0.72,0.5];
+    let svg="";
+    WHEEL.forEach((fam,i)=>{
+      const angC=-90+i*45, a0=angC-22.5, a1=angC+22.5;
+      for(let j=0;j<3;j++){
+        const d=sectorPath(cx,cy,bands[j],bands[j+1],a0,a1);
+        svg+=`<path class="wedge" d="${d}" fill="${fam.color}" fill-opacity="${ops[j]}" `+
+             `data-baseop="${ops[j]}" data-emotion="${fam.levels[j]}"></path>`;
+      }
+      for(let j=0;j<3;j++){
+        const rm=(bands[j]+bands[j+1])/2, lp=polar(cx,cy,rm,angC);
+        let rot=angC; if(angC>90||angC<-90) rot=angC+180;
+        const cls=j===1?"wlabel":"wlabel lvl";
+        svg+=`<text class="${cls}" x="${lp[0].toFixed(1)}" y="${lp[1].toFixed(1)}" text-anchor="middle" `+
+             `dominant-baseline="central" transform="rotate(${rot.toFixed(1)} ${lp[0].toFixed(1)} ${lp[1].toFixed(1)})">${fam.levels[j]}</text>`;
+      }
+    });
+    svg+=`<circle cx="${cx}" cy="${cy}" r="46" fill="var(--surface)" stroke="var(--line)"></circle>`;
+    $("wheel").innerHTML=svg;
+    $("wheel").querySelectorAll(".wedge").forEach(el=>el.addEventListener("click",()=>{
+      const f=el.dataset.emotion, i=entry.moods.indexOf(f);
       if(i>=0) entry.moods.splice(i,1); else entry.moods.push(f);
-      renderEntry(); autosave();
+      renderMood(); autosave();
     }));
   })();
+
+  function renderMood(){
+    $("wheel").querySelectorAll(".wedge").forEach(el=>{
+      const sel = entry.moods.indexOf(el.dataset.emotion)>=0;
+      el.classList.toggle("sel",sel);
+      el.setAttribute("fill-opacity", sel?1:el.dataset.baseop);
+    });
+    const wrap=$("moodSel");
+    wrap.innerHTML = entry.moods.map(f=>{
+      const fam=WHEEL.find(w=>w.levels.indexOf(f)>=0);
+      const c=fam?fam.color:"var(--accent)";
+      return `<span class="msel" data-emotion="${f}" style="border-color:${c};color:${c};">${f}<span class="x">×</span></span>`;
+    }).join("");
+    wrap.querySelectorAll(".msel").forEach(el=>el.addEventListener("click",()=>{
+      const i=entry.moods.indexOf(el.dataset.emotion); if(i>=0) entry.moods.splice(i,1);
+      renderMood(); autosave();
+    }));
+  }
 
   // ----- render -----
   function renderHeader(){
@@ -452,7 +495,7 @@
     el.innerHTML = `手術から <b>${days}日</b>${wk}`;
   }
   function renderEntry(){
-    document.querySelectorAll(".feel").forEach(el=>el.classList.toggle("on", entry.moods.indexOf(el.dataset.f)>=0));
+    renderMood();
     $("sleepVal").textContent = entry.sleep==null ? "—" : entry.sleep;
     document.querySelectorAll(".dot").forEach(el=>el.classList.toggle("on", entry.energy!=null && Number(el.dataset.e)<=entry.energy));
     $("medsToggle").classList.toggle("on", !!entry.meds);
