@@ -423,21 +423,21 @@
   // levels = [intense(inner), base(mid), mild(outer)]
   const WHEEL = [
     { family:"Joy",          ja:"喜び",   tone:"pos",  color:"#F2C94C", levels:["Ecstasy","Joy","Serenity"],          levelsJa:["恍惚","喜び","平穏"],
-      feelings:["幸せ","嬉しい","楽しい","ご機嫌","ラッキー","満たされた","カーム","平穏","恍惚"] },
+      feelings:["Happy","Joyful","Cheerful","Content","Delighted","Grateful","Blissful","Elated","Playful","Lucky","Calm","Peaceful","Serene","Satisfied","Proud","Radiant","Cozy","Free","Lighthearted","Ecstatic"] },
     { family:"Trust",        ja:"信頼",   tone:"pos",  color:"#9CCC5A", levels:["Admiration","Trust","Acceptance"],   levelsJa:["敬愛","信頼","容認"],
-      feelings:["愛されてる","キュンキュン","大好き","信頼","安心","受け入れられてる","敬愛"] },
+      feelings:["Loved","Affectionate","Warm","Tender","Trusting","Safe","Secure","Connected","Accepted","Supported","Cherished","Close","Devoted","Admiring","Respected","Open","Bonded","Smitten","Butterflies","Comforted"] },
     { family:"Fear",         ja:"恐れ",   tone:"hard", color:"#46A86B", levels:["Terror","Fear","Apprehension"],      levelsJa:["恐怖","恐れ","不安"],
-      feelings:["不安","心配","緊張","そわそわ","落ち着かない","ビクビク","恐怖"] },
+      feelings:["Anxious","Worried","Nervous","Scared","Afraid","Tense","Insecure","Overwhelmed","Stressed","Panicked","Restless","Jittery","Apprehensive","Dread","Helpless","Threatened","Shaky","On edge","Frightened","Timid"] },
     { family:"Surprise",     ja:"驚き",   tone:"calm", color:"#46B6D9", levels:["Amazement","Surprise","Distraction"],levelsJa:["驚嘆","驚き","放心"],
-      feelings:["びっくり","驚き","戸惑い","予想外","ぼーっと","放心","驚嘆"] },
+      feelings:["Surprised","Amazed","Astonished","Startled","Shocked","Stunned","Confused","Bewildered","Speechless","Dazed","Spaced-out","Wonder","Awe","Disoriented","Unsettled","Intrigued","Puzzled","Caught off guard","Flustered","Rattled"] },
     { family:"Sadness",      ja:"悲しみ", tone:"hard", color:"#5C7CDA", levels:["Grief","Sadness","Pensiveness"],     levelsJa:["悲嘆","悲しみ","憂い"],
-      feelings:["悲しい","寂しい","落ち込み","むなしい","泣きたい","憂い","悲嘆"] },
+      feelings:["Sad","Lonely","Down","Blue","Heartbroken","Hurt","Disappointed","Empty","Hopeless","Grieving","Tearful","Melancholy","Gloomy","Discouraged","Drained","Numb","Vulnerable","Regretful","Homesick","Wistful"] },
     { family:"Disgust",      ja:"嫌悪",   tone:"hard", color:"#9A6FC7", levels:["Loathing","Disgust","Boredom"],      levelsJa:["強い嫌悪","嫌悪","退屈"],
-      feelings:["うんざり","モヤモヤ","げんなり","嫌悪","退屈","強い嫌悪"] },
+      feelings:["Disgusted","Repulsed","Grossed out","Uncomfortable","Bored","Sick of it","Judgmental","Disapproving","Contempt","Averse","Turned off","Uneasy","Distaste","Reluctant","Withdrawn","Detached","Cynical","Jaded","Indifferent","Put off"] },
     { family:"Anger",        ja:"怒り",   tone:"hard", color:"#E2554C", levels:["Rage","Anger","Annoyance"],          levelsJa:["激怒","怒り","苛立ち"],
-      feelings:["イライラ","ムカつく","苛立ち","不満","怒り","激怒"] },
+      feelings:["Angry","Frustrated","Irritated","Annoyed","Mad","Furious","Resentful","Bitter","Agitated","Impatient","Defensive","Jealous","Envious","Indignant","Grumpy","Hostile","Fed up","Snappy","Pissed off","Outraged"] },
     { family:"Anticipation", ja:"期待",   tone:"pos",  color:"#F0922E", levels:["Vigilance","Anticipation","Interest"],levelsJa:["警戒","期待","関心"],
-      feelings:["ワクワク","楽しみ","ドキドキ","やる気","希望","期待","関心","警戒"] }
+      feelings:["Excited","Eager","Hopeful","Curious","Inspired","Motivated","Energized","Optimistic","Thrilled","Determined","Focused","Driven","Interested","Keen","Adventurous","Pumped","Giddy","Ambitious","Alert","Vigilant"] }
   ];
   const TONE_OF = {}, FEELING_FAMILY = {};
   WHEEL.forEach(f => {
