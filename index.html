@@ -134,6 +134,8 @@
     background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--text);
     font-family:inherit;font-size:16px;padding:8px 12px;color-scheme:dark;
   }
+  .medsday{display:none;margin-top:10px;padding:11px 16px;border-radius:14px;background:var(--accent-soft);color:var(--accent);font-size:13.5px;font-weight:600;text-align:center;}
+  .medsday.show{display:block;}
 
   /* ---------- diary ---------- */
   textarea{
@@ -301,6 +303,7 @@
       <div class="t-name">何時に</div>
       <input type="time" id="medsTime" />
     </div>
+    <div class="medsday" id="medsDay"></div>
   </div>
 
   <!-- diary -->
@@ -511,15 +514,28 @@
     $("next").disabled = current >= todayKey();
     renderSurgery();
   }
+  // counts ONLY actual recorded doses (her taps) up to & including the viewed day — never invents a schedule
+  function medsStats(){
+    const keys=[];
+    for(const k in store){ if(k!==current && k<=current && store[k] && store[k].meds) keys.push(k); }
+    if(entry.meds) keys.push(current);
+    if(!keys.length) return null;
+    keys.sort();
+    const dayN = Math.round((keyToDate(current)-keyToDate(keys[0]))/86400000)+1;
+    return {dayN, taken:keys.length, start:keys[0]};
+  }
   function renderSurgery(){
-    const days = Math.round((keyToDate(current) - keyToDate(SURGERY)) / 86400000);
+    const cur = keyToDate(current), sx = keyToDate(SURGERY);
+    const days = Math.round((cur - sx) / 86400000);
     const el = $("surgeryText");
     if(days < 0){ $("surgery").style.display="none"; return; }
     $("surgery").style.display="flex";
     if(days === 0){ el.innerHTML = "手術当日"; return; }
-    const w = Math.floor(days/7), r = days%7;
-    const wk = w>0 ? `（${w}週間${r>0?r+"日":""}）` : "";
-    el.innerHTML = `手術から <b>${days}日</b>${wk}`;
+    let months = (cur.getFullYear()-sx.getFullYear())*12 + (cur.getMonth()-sx.getMonth());
+    let rem = cur.getDate() - sx.getDate();
+    if(rem < 0){ months--; rem += new Date(cur.getFullYear(), cur.getMonth(), 0).getDate(); }
+    const mlabel = months>0 ? `${months}ヶ月${rem>0?rem+"日":""}` : `${rem}日`;
+    el.innerHTML = `手術から <b>${days}日</b>（${mlabel}）`;
   }
   function renderEntry(){
     renderMood();
@@ -528,6 +544,9 @@
     $("medsToggle").classList.toggle("on", !!entry.meds);
     $("medsTimeRow").classList.toggle("show", !!entry.meds);
     $("medsTime").value = entry.medsTime || "";
+    const md=$("medsDay");
+    md.classList.toggle("show", !!entry.meds);
+    if(entry.meds){ const st=medsStats(); md.textContent = st ? `Day ${st.dayN}（通算 ${st.taken}日服用）` : ""; }
     document.querySelectorAll(".chip").forEach(el=>el.classList.toggle("on", !!(entry.habits && entry.habits[el.dataset.h])));
     $("diary").value = entry.diary || "";
   }
@@ -640,7 +659,7 @@
     if(wl.length) L.push(wl.join(" ・ "));
     const hs=Object.keys(e.habits||{}).filter(h=>e.habits[h]).map(h=>HABIT_NAMES[h]||h);
     if(hs.length) L.push("習慣: "+hs.join(" / "));
-    if(e.meds) L.push("服用: "+(e.medsTime?e.medsTime+" ":"")+"服用した");
+    if(e.meds){ const st=medsStats(); L.push("服用: "+(e.medsTime?e.medsTime+" ":"")+"服用した"+(st?`（Day ${st.dayN}/通算${st.taken}日）`:"")); }
     if(e.diary) L.push("日記: "+e.diary);
     return L.join("\n");
   }
