@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#14110F" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Diary" />
+<link rel="manifest" href="manifest.json" />
+<title>Daily — 日記とトラッキング</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#14110F;
+    --surface:#1E1915;
+    --surface-2:#26201B;
+    --line:#332b24;
+    --text:#F3EDE4;
+    --muted:#9C9085;
+    --faint:#6F655B;
+    --accent:#E8A33D;
+    --accent-soft:rgba(232,163,61,.14);
+    --intimacy:#D86B7C;
+    --good:#7FB069;
+    --radius:18px;
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bot:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);}
+  body{
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+    font-size:16px;line-height:1.5;
+    padding:calc(var(--safe-top) + 8px) 18px calc(96px + var(--safe-bot));
+    max-width:560px;margin:0 auto;min-height:100vh;
+    overscroll-behavior-y:contain;
+  }
+  h1,h2,h3{font-family:"DM Serif Display",Georgia,serif;font-weight:400;letter-spacing:.2px;}
+
+  /* ---------- header ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0 18px;}
+  .navbtn{
+    width:40px;height:40px;border-radius:50%;border:1px solid var(--line);
+    background:var(--surface);color:var(--text);font-size:18px;display:grid;place-items:center;
+    cursor:pointer;transition:.15s;
+  }
+  .navbtn:active{transform:scale(.92);background:var(--surface-2);}
+  .navbtn:disabled{opacity:.3;}
+  .datewrap{text-align:center;flex:1;}
+  .datewrap .dow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);}
+  .datewrap .big{font-family:"DM Serif Display",serif;font-size:26px;line-height:1.1;margin-top:2px;}
+  .datewrap .today-pill{
+    display:inline-block;margin-top:6px;font-size:11px;color:var(--faint);
+  }
+  .datewrap .today-pill.is-today{color:var(--accent);}
+
+  /* ---------- card ---------- */
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;margin-bottom:14px;
+  }
+  .card .label{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+
+  /* ---------- mood ---------- */
+  .moods{display:flex;justify-content:space-between;gap:6px;}
+  .mood{
+    flex:1;aspect-ratio:1;border-radius:14px;border:1px solid transparent;background:var(--surface-2);
+    font-size:26px;display:grid;place-items:center;cursor:pointer;transition:.15s;filter:grayscale(.5);opacity:.6;
+  }
+  .mood:active{transform:scale(.9);}
+  .mood.sel{background:var(--accent-soft);border-color:var(--accent);filter:none;opacity:1;transform:scale(1.05);}
+
+  /* ---------- wellness ---------- */
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .row + .row{margin-top:16px;}
+  .row .name{font-size:15px;}
+  .stepper{display:flex;align-items:center;gap:14px;}
+  .stepper button{
+    width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);
+    color:var(--text);font-size:18px;cursor:pointer;line-height:1;
+  }
+  .stepper button:active{background:var(--accent-soft);}
+  .stepper .val{min-width:62px;text-align:center;font-variant-numeric:tabular-nums;}
+  .stepper .val b{font-family:"DM Serif Display",serif;font-size:22px;font-weight:400;}
+  .stepper .val span{font-size:12px;color:var(--muted);}
+  .dots{display:flex;gap:8px;}
+  .dot{
+    width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);background:transparent;cursor:pointer;transition:.12s;
+  }
+  .dot.on{background:var(--accent);border-color:var(--accent);}
+  .dot:active{transform:scale(.85);}
+
+  /* ---------- toggles ---------- */
+  .toggle{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 16px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);cursor:pointer;
+  }
+  .toggle + .toggle{margin-top:10px;}
+  .toggle .t-left{display:flex;align-items:center;gap:12px;}
+  .toggle .t-emoji{font-size:20px;}
+  .toggle .t-name{font-size:15px;}
+  .toggle .t-sub{font-size:11px;color:var(--faint);}
+  .switch{width:48px;height:28px;border-radius:20px;background:#3a3128;position:relative;flex:none;transition:.18s;}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#cabfb2;transition:.18s;}
+  .toggle.on .switch{background:var(--accent);}
+  .toggle.on.intimacy .switch{background:var(--intimacy);}
+  .toggle.on .switch::after{left:23px;background:#fff;}
+
+  /* ---------- habits ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:9px;}
+  .chip{
+    padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);
+    color:var(--muted);font-size:14px;cursor:pointer;transition:.13s;display:flex;align-items:center;gap:6px;
+  }
+  .chip:active{transform:scale(.94);}
+  .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--text);}
+  .chip.on::before{content:"✓";color:var(--accent);font-size:12px;}
+
+  /* ---------- diary ---------- */
+  textarea{
+    width:100%;min-height:120px;resize:vertical;background:var(--surface-2);border:1px solid var(--line);
+    border-radius:14px;padding:14px;color:var(--text);font-family:inherit;font-size:15px;line-height:1.6;
+  }
+  textarea:focus{outline:none;border-color:var(--accent);}
+  textarea::placeholder{color:var(--faint);}
+
+  /* ---------- save bar ---------- */
+  .savebar{
+    position:fixed;left:0;right:0;bottom:0;padding:12px 18px calc(12px + var(--safe-bot));
+    background:linear-gradient(to top,var(--bg) 60%,transparent);display:flex;gap:10px;max-width:560px;margin:0 auto;
+  }
+  .btn{
+    flex:1;padding:15px;border-radius:14px;border:none;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;
+  }
+  .btn-primary{background:var(--accent);color:#1b1306;}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-ghost{flex:none;width:54px;background:var(--surface);border:1px solid var(--line);color:var(--text);font-size:18px;}
+  .saved-flash{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:var(--good);color:#0f1c0a;
+    padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;
+    z-index:50;
+  }
+  .saved-flash.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+  /* ---------- history sheet ---------- */
+  .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.2s;z-index:60;}
+  .sheet-bg.show{opacity:1;pointer-events:auto;}
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top-left-radius:24px;border-top-right-radius:24px;
+    border-top:1px solid var(--line);padding:8px 18px calc(24px + var(--safe-bot));max-width:560px;margin:0 auto;
+    transform:translateY(100%);transition:.25s cubic-bezier(.2,.8,.2,1);z-index:61;max-height:82vh;overflow:auto;
+  }
+  .sheet.show{transform:translateY(0);}
+  .grabber{width:38px;height:4px;border-radius:2px;background:var(--line);margin:8px auto 16px;}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .cal-head h2{font-size:20px;margin:0;}
+  .cal-head button{background:none;border:none;color:var(--accent);font-size:20px;cursor:pointer;padding:4px 10px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .cal-dow{font-size:10px;color:var(--faint);text-align:center;padding-bottom:4px;}
+  .cal-cell{aspect-ratio:1;border-radius:10px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:1px solid transparent;}
+  .cal-cell.empty{background:transparent;cursor:default;}
+  .cal-cell.has{border-color:var(--line);}
+  .cal-cell.is-today{border-color:var(--accent);}
+  .cal-cell .d{font-size:12px;color:var(--muted);}
+  .cal-cell .m{font-size:14px;line-height:1;}
+  .cal-legend{margin-top:14px;font-size:11px;color:var(--faint);text-align:center;}
+  .exportrow{display:flex;gap:10px;margin-top:18px;}
+  .exportrow .btn{font-size:13px;padding:12px;}
+  .exportrow .btn-ghost2{flex:1;background:var(--surface);border:1px solid var(--line);color:var(--text);border-radius:12px;}
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <button class="navbtn" id="prev" aria-label="前の日">‹</button>
+    <div class="datewrap">
+      <div class="dow" id="dow">FRIDAY</div>
+      <div class="big" id="dateBig">6月17日</div>
+      <div class="today-pill" id="todayPill">今日</div>
+    </div>
+    <button class="navbtn" id="next" aria-label="次の日">›</button>
+  </div>
+
+  <!-- mood -->
+  <div class="card">
+    <div class="label">きょうの気分</div>
+    <div class="moods" id="moods">
+      <div class="mood" data-mood="1">😔</div>
+      <div class="mood" data-mood="2">😕</div>
+      <div class="mood" data-mood="3">😐</div>
+      <div class="mood" data-mood="4">🙂</div>
+      <div class="mood" data-mood="5">😄</div>
+    </div>
+  </div>
+
+  <!-- wellness -->
+  <div class="card">
+    <div class="label">体調・ウェルネス</div>
+    <div class="row">
+      <div class="name">睡眠</div>
+      <div class="stepper">
+        <button id="sleepDown">−</button>
+        <div class="val"><b id="sleepVal">—</b><span> h</span></div>
+        <button id="sleepUp">＋</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="name">エネルギー</div>
+      <div class="dots" id="energyDots">
+        <div class="dot" data-e="1"></div>
+        <div class="dot" data-e="2"></div>
+        <div class="dot" data-e="3"></div>
+        <div class="dot" data-e="4"></div>
+        <div class="dot" data-e="5"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- toggles -->
+  <div class="card">
+    <div class="label">きょうの記録</div>
+    <div class="toggle" id="medsToggle">
+      <div class="t-left">
+        <span class="t-emoji">💊</span>
+        <div>
+          <div class="t-name">服薬した</div>
+          <div class="t-sub">タップした事実だけ記録</div>
+        </div>
+      </div>
+      <div class="switch"></div>
+    </div>
+    <div class="toggle intimacy" id="sexToggle">
+      <div class="t-left">
+        <span class="t-emoji">❤️</span>
+        <div>
+          <div class="t-name">intimacy</div>
+          <div class="t-sub">端末内のみ・外部送信なし</div>
+        </div>
+      </div>
+      <div class="switch"></div>
+    </div>
+  </div>
+
+  <!-- habits -->
+  <div class="card">
+    <div class="label">習慣</div>
+    <div class="chips" id="habits">
+      <div class="chip" data-h="water">水分</div>
+      <div class="chip" data-h="move">運動</div>
+      <div class="chip" data-h="out">外出</div>
+      <div class="chip" data-h="meal">ちゃんと食事</div>
+      <div class="chip" data-h="skincare">スキンケア</div>
+      <div class="chip" data-h="read">インプット</div>
+    </div>
+  </div>
+
+  <!-- diary -->
+  <div class="card">
+    <div class="label">ひとこと日記</div>
+    <textarea id="diary" placeholder="きょう何があった？どう感じた？"></textarea>
+  </div>
+
+  <div class="saved-flash" id="flash">保存しました</div>
+
+  <div class="savebar">
+    <button class="btn btn-ghost" id="openHistory" aria-label="履歴">📅</button>
+    <button class="btn btn-primary" id="save">保存</button>
+  </div>
+
+  <!-- history sheet -->
+  <div class="sheet-bg" id="sheetBg"></div>
+  <div class="sheet" id="sheet">
+    <div class="grabber"></div>
+    <div class="cal-head">
+      <button id="calPrev">‹</button>
+      <h2 id="calTitle">2026年6月</h2>
+      <button id="calNext">›</button>
+    </div>
+    <div class="cal-grid" id="calDow"></div>
+    <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
+    <div class="cal-legend">日付をタップでその日を開く・気分の絵文字を表示</div>
+    <div class="exportrow">
+      <button class="btn btn-ghost2" id="exportBtn">データ書き出し (JSON)</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  const KEY = "diaryTracker.v1";
+  const HABIT_KEYS = ["water","move","out","meal","skincare","read"];
+
+  // ----- storage -----
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+  function saveAll(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+  let store = load();
+
+  // ----- date helpers (5am day boundary, like Monica's rule) -----
+  function dayKeyFromDate(dt){
+    const shifted = new Date(dt.getTime() - 5*3600*1000); // before 5am counts as previous day
+    const y = shifted.getFullYear();
+    const m = String(shifted.getMonth()+1).padStart(2,"0");
+    const d = String(shifted.getDate()).padStart(2,"0");
+    return `${y}-${m}-${d}`;
+  }
+  function todayKey(){ return dayKeyFromDate(new Date()); }
+  function keyToDate(k){ const [y,m,d]=k.split("-").map(Number); return new Date(y,m-1,d); }
+  function shiftKey(k,delta){ const dt=keyToDate(k); dt.setDate(dt.getDate()+delta); return dayKeyFromDate(new Date(dt.getTime()+5*3600*1000)); }
+
+  const DOW = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+  const MOOD_EMOJI = {1:"😔",2:"😕",3:"😐",4:"🙂",5:"😄"};
+
+  let current = todayKey();
+
+  // ----- entry model -----
+  function blank(){ return {mood:null,sleep:null,energy:null,meds:false,sex:false,habits:{},diary:""}; }
+  function getEntry(k){ return Object.assign(blank(), store[k]||{}); }
+  let entry = getEntry(current);
+
+  // ----- render today -----
+  const $ = id => document.getElementById(id);
+  function renderHeader(){
+    const dt = keyToDate(current);
+    $("dow").textContent = DOW[dt.getDay()];
+    $("dateBig").textContent = `${dt.getMonth()+1}月${dt.getDate()}日`;
+    const pill = $("todayPill");
+    if(current === todayKey()){ pill.textContent="今日"; pill.classList.add("is-today"); }
+    else { pill.textContent=dt.getFullYear()+"年"; pill.classList.remove("is-today"); }
+    $("next").disabled = current >= todayKey();
+  }
+  function renderEntry(){
+    document.querySelectorAll(".mood").forEach(el=>el.classList.toggle("sel", Number(el.dataset.mood)===entry.mood));
+    $("sleepVal").textContent = entry.sleep==null ? "—" : entry.sleep;
+    document.querySelectorAll(".dot").forEach(el=>el.classList.toggle("on", entry.energy!=null && Number(el.dataset.e)<=entry.energy));
+    $("medsToggle").classList.toggle("on", !!entry.meds);
+    $("sexToggle").classList.toggle("on", !!entry.sex);
+    document.querySelectorAll(".chip").forEach(el=>el.classList.toggle("on", !!(entry.habits && entry.habits[el.dataset.h])));
+    $("diary").value = entry.diary || "";
+  }
+  function renderAll(){ entry = getEntry(current); renderHeader(); renderEntry(); }
+
+  // ----- persist current entry -----
+  function persist(){
+    // only store if there's any content
+    const has = entry.mood||entry.sleep!=null||entry.energy||entry.meds||entry.sex||entry.diary||Object.values(entry.habits||{}).some(Boolean);
+    if(has){ entry.updatedAt = new Date().toISOString(); store[current]=entry; }
+    else { delete store[current]; }
+    saveAll(store);
+  }
+  let dirtyTimer=null;
+  function autosave(){ clearTimeout(dirtyTimer); dirtyTimer=setTimeout(persist,400); }
+
+  // ----- interactions -----
+  document.querySelectorAll(".mood").forEach(el=>el.addEventListener("click",()=>{
+    const v=Number(el.dataset.mood); entry.mood = entry.mood===v?null:v; renderEntry(); autosave();
+  }));
+  $("sleepUp").addEventListener("click",()=>{ entry.sleep = Math.min(14,(entry.sleep==null?7:entry.sleep)+0.5); renderEntry(); autosave(); });
+  $("sleepDown").addEventListener("click",()=>{ entry.sleep = Math.max(0,(entry.sleep==null?7:entry.sleep)-0.5); renderEntry(); autosave(); });
+  document.querySelectorAll(".dot").forEach(el=>el.addEventListener("click",()=>{
+    const v=Number(el.dataset.e); entry.energy = entry.energy===v?null:v; renderEntry(); autosave();
+  }));
+  $("medsToggle").addEventListener("click",()=>{ entry.meds=!entry.meds; renderEntry(); autosave(); });
+  $("sexToggle").addEventListener("click",()=>{ entry.sex=!entry.sex; renderEntry(); autosave(); });
+  document.querySelectorAll(".chip").forEach(el=>el.addEventListener("click",()=>{
+    entry.habits=entry.habits||{}; const h=el.dataset.h; entry.habits[h]=!entry.habits[h]; renderEntry(); autosave();
+  }));
+  $("diary").addEventListener("input",()=>{ entry.diary=$("diary").value; autosave(); });
+
+  $("prev").addEventListener("click",()=>{ persist(); current=shiftKey(current,-1); renderAll(); });
+  $("next").addEventListener("click",()=>{ if(current>=todayKey())return; persist(); current=shiftKey(current,1); renderAll(); });
+
+  function flash(msg){ const f=$("flash"); f.textContent=msg||"保存しました"; f.classList.add("show"); setTimeout(()=>f.classList.remove("show"),1200); }
+  $("save").addEventListener("click",()=>{ persist(); flash(); });
+
+  // ----- history sheet / calendar -----
+  let calRef = keyToDate(current);
+  function openSheet(){ calRef=keyToDate(current); renderCal(); $("sheetBg").classList.add("show"); $("sheet").classList.add("show"); }
+  function closeSheet(){ $("sheetBg").classList.remove("show"); $("sheet").classList.remove("show"); }
+  $("openHistory").addEventListener("click",openSheet);
+  $("sheetBg").addEventListener("click",closeSheet);
+
+  // dow header
+  (function(){ const wd=["日","月","火","水","木","金","土"]; $("calDow").innerHTML=wd.map(d=>`<div class="cal-dow">${d}</div>`).join(""); })();
+
+  function renderCal(){
+    const y=calRef.getFullYear(), m=calRef.getMonth();
+    $("calTitle").textContent=`${y}年${m+1}月`;
+    const first=new Date(y,m,1).getDay();
+    const days=new Date(y,m+1,0).getDate();
+    let html="";
+    for(let i=0;i<first;i++) html+=`<div class="cal-cell empty"></div>`;
+    for(let d=1;d<=days;d++){
+      const k=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      const e=store[k];
+      const isToday = k===todayKey();
+      const mood = e&&e.mood?MOOD_EMOJI[e.mood]:"";
+      const dot = e&&!e.mood ? "·" : "";
+      html+=`<div class="cal-cell ${e?'has':''} ${isToday?'is-today':''}" data-k="${k}">
+        <div class="d">${d}</div><div class="m">${mood||dot}</div></div>`;
+    }
+    $("calGrid").innerHTML=html;
+    document.querySelectorAll(".cal-cell[data-k]").forEach(el=>el.addEventListener("click",()=>{
+      const k=el.dataset.k; if(k>todayKey())return; persist(); current=k; renderAll(); closeSheet();
+    }));
+  }
+  $("calPrev").addEventListener("click",()=>{ calRef=new Date(calRef.getFullYear(),calRef.getMonth()-1,1); renderCal(); });
+  $("calNext").addEventListener("click",()=>{ calRef=new Date(calRef.getFullYear(),calRef.getMonth()+1,1); renderCal(); });
+
+  // ----- export -----
+  $("exportBtn").addEventListener("click",()=>{
+    const blob=new Blob([JSON.stringify(store,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a");
+    a.href=url; a.download=`diary-export-${todayKey()}.json`; a.click(); URL.revokeObjectURL(url);
+  });
+
+  // ----- swipe nav -----
+  let tx=0;
+  document.body.addEventListener("touchstart",e=>{ tx=e.touches[0].clientX; },{passive:true});
+  document.body.addEventListener("touchend",e=>{
+    if($("sheet").classList.contains("show"))return;
+    const dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)<70)return;
+    if(dx>0){ persist(); current=shiftKey(current,-1); renderAll(); }
+    else if(current<todayKey()){ persist(); current=shiftKey(current,1); renderAll(); }
+  },{passive:true});
+
+  // ----- init -----
+  renderAll();
+  if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+})();
+</script>
+</body>
+</html>
