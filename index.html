@@ -73,8 +73,8 @@
   .wedge{cursor:pointer;stroke:var(--bg);stroke-width:1.4;transition:fill-opacity .12s,stroke-width .1s;}
   .wedge:active{stroke:#fff;}
   .wedge.sel{stroke:#fff;stroke-width:2.6;}
-  .wlabel{font-size:8.5px;fill:#fff;opacity:.95;pointer-events:none;font-weight:600;}
-  .wlabel.lvl{font-size:7px;opacity:.78;font-weight:400;}
+  .wlabel{font-size:8px;fill:#fff;opacity:.96;pointer-events:none;font-weight:600;letter-spacing:-.2px;}
+  .wlabel.lvl{font-size:6.5px;opacity:.8;font-weight:500;}
   .mood-sel{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
   .mood-sel:empty{display:none;}
   .msel{padding:5px 11px;border-radius:999px;font-size:13px;border:1px solid;display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.04);}
@@ -229,7 +229,7 @@
 
   <!-- mood: wheel of emotions -->
   <div class="card">
-    <div class="label">きょうの気分 · 感情の輪</div>
+    <div class="label">きょうの気分 · Wheel of Emotions</div>
     <div class="hint">あてはまる気持ちをタップ（中心ほど強い／外ほどやわらか）。何個でも</div>
     <div class="wheel-wrap"><svg id="wheel" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" aria-label="感情の輪"></svg></div>
     <div class="mood-sel" id="moodSel"></div>
@@ -374,14 +374,14 @@
   // ----- wheel of emotions (Plutchik) : 8 families x 3 intensities -----
   // levels = [intense(inner), base(mid), mild(outer)]
   const WHEEL = [
-    { family:"喜び",   tone:"pos",  color:"#F2C94C", levels:["恍惚","喜び","平穏"] },
-    { family:"信頼",   tone:"pos",  color:"#9CCC5A", levels:["敬愛","信頼","容認"] },
-    { family:"恐れ",   tone:"hard", color:"#46A86B", levels:["恐怖","恐れ","不安"] },
-    { family:"驚き",   tone:"calm", color:"#46B6D9", levels:["驚嘆","驚き","放心"] },
-    { family:"悲しみ", tone:"hard", color:"#5C7CDA", levels:["悲嘆","悲しみ","憂い"] },
-    { family:"嫌悪",   tone:"hard", color:"#9A6FC7", levels:["強い嫌悪","嫌悪","退屈"] },
-    { family:"怒り",   tone:"hard", color:"#E2554C", levels:["激怒","怒り","苛立ち"] },
-    { family:"期待",   tone:"pos",  color:"#F0922E", levels:["警戒","期待","関心"] }
+    { family:"Joy",          tone:"pos",  color:"#F2C94C", levels:["Ecstasy","Joy","Serenity"] },
+    { family:"Trust",        tone:"pos",  color:"#9CCC5A", levels:["Admiration","Trust","Acceptance"] },
+    { family:"Fear",         tone:"hard", color:"#46A86B", levels:["Terror","Fear","Apprehension"] },
+    { family:"Surprise",     tone:"calm", color:"#46B6D9", levels:["Amazement","Surprise","Distraction"] },
+    { family:"Sadness",      tone:"hard", color:"#5C7CDA", levels:["Grief","Sadness","Pensiveness"] },
+    { family:"Disgust",      tone:"hard", color:"#9A6FC7", levels:["Loathing","Disgust","Boredom"] },
+    { family:"Anger",        tone:"hard", color:"#E2554C", levels:["Rage","Anger","Annoyance"] },
+    { family:"Anticipation", tone:"pos",  color:"#F0922E", levels:["Vigilance","Anticipation","Interest"] }
   ];
   const TONE_OF = {};
   WHEEL.forEach(f => f.levels.forEach(l => TONE_OF[l] = f.tone));
@@ -440,7 +440,7 @@
       }
       for(let j=0;j<3;j++){
         const rm=(bands[j]+bands[j+1])/2, lp=polar(cx,cy,rm,angC);
-        let rot=angC; if(angC>90||angC<-90) rot=angC+180;
+        let rot=angC+90; rot=((rot+180)%360)-180; if(rot>90) rot-=180; if(rot<-90) rot+=180; // tangential, upright
         const cls=j===1?"wlabel":"wlabel lvl";
         svg+=`<text class="${cls}" x="${lp[0].toFixed(1)}" y="${lp[1].toFixed(1)}" text-anchor="middle" `+
              `dominant-baseline="central" transform="rotate(${rot.toFixed(1)} ${lp[0].toFixed(1)} ${lp[1].toFixed(1)})">${fam.levels[j]}</text>`;
