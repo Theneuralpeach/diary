@@ -76,6 +76,12 @@
   .wedge.sel{stroke:#FFFFFF;stroke-width:2.8;}
   .wlabel{font-size:8px;opacity:.98;pointer-events:none;font-weight:600;letter-spacing:-.2px;}
   .wlabel.lvl{font-size:6.5px;opacity:.85;font-weight:500;}
+  .mood-drill{margin-top:14px;}
+  .mood-drill:empty{display:none;}
+  .drill-head{font-size:12px;font-weight:600;margin-bottom:10px;letter-spacing:.3px;}
+  .drill-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .drill-chip{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);font-size:14px;cursor:pointer;transition:.12s;}
+  .drill-chip:active{transform:scale(.93);}
   .mood-sel{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
   .mood-sel:empty{display:none;}
   .msel{padding:5px 11px;border-radius:999px;font-size:13px;border:1px solid;display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.04);}
@@ -247,8 +253,9 @@
   <!-- mood: wheel of emotions -->
   <div class="card">
     <div class="label">Today's mood · Wheel of Emotions</div>
-    <div class="hint">Tap how you feel — center = stronger, outer = softer. Pick any number.</div>
+    <div class="hint">Tap a section to open its feelings · pick any number.</div>
     <div class="wheel-wrap"><svg id="wheel" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" aria-label="感情の輪"></svg></div>
+    <div class="mood-drill" id="moodDrill"></div>
     <div class="mood-sel" id="moodSel"></div>
   </div>
 
@@ -415,17 +422,28 @@
   // ----- wheel of emotions (Plutchik) : 8 families x 3 intensities -----
   // levels = [intense(inner), base(mid), mild(outer)]
   const WHEEL = [
-    { family:"Joy",          ja:"喜び",   tone:"pos",  color:"#F2C94C", levels:["Ecstasy","Joy","Serenity"],          levelsJa:["恍惚","喜び","平穏"] },
-    { family:"Trust",        ja:"信頼",   tone:"pos",  color:"#9CCC5A", levels:["Admiration","Trust","Acceptance"],   levelsJa:["敬愛","信頼","容認"] },
-    { family:"Fear",         ja:"恐れ",   tone:"hard", color:"#46A86B", levels:["Terror","Fear","Apprehension"],      levelsJa:["恐怖","恐れ","不安"] },
-    { family:"Surprise",     ja:"驚き",   tone:"calm", color:"#46B6D9", levels:["Amazement","Surprise","Distraction"],levelsJa:["驚嘆","驚き","放心"] },
-    { family:"Sadness",      ja:"悲しみ", tone:"hard", color:"#5C7CDA", levels:["Grief","Sadness","Pensiveness"],     levelsJa:["悲嘆","悲しみ","憂い"] },
-    { family:"Disgust",      ja:"嫌悪",   tone:"hard", color:"#9A6FC7", levels:["Loathing","Disgust","Boredom"],      levelsJa:["強い嫌悪","嫌悪","退屈"] },
-    { family:"Anger",        ja:"怒り",   tone:"hard", color:"#E2554C", levels:["Rage","Anger","Annoyance"],          levelsJa:["激怒","怒り","苛立ち"] },
-    { family:"Anticipation", ja:"期待",   tone:"pos",  color:"#F0922E", levels:["Vigilance","Anticipation","Interest"],levelsJa:["警戒","期待","関心"] }
+    { family:"Joy",          ja:"喜び",   tone:"pos",  color:"#F2C94C", levels:["Ecstasy","Joy","Serenity"],          levelsJa:["恍惚","喜び","平穏"],
+      feelings:["幸せ","嬉しい","楽しい","ご機嫌","ラッキー","満たされた","カーム","平穏","恍惚"] },
+    { family:"Trust",        ja:"信頼",   tone:"pos",  color:"#9CCC5A", levels:["Admiration","Trust","Acceptance"],   levelsJa:["敬愛","信頼","容認"],
+      feelings:["愛されてる","キュンキュン","大好き","信頼","安心","受け入れられてる","敬愛"] },
+    { family:"Fear",         ja:"恐れ",   tone:"hard", color:"#46A86B", levels:["Terror","Fear","Apprehension"],      levelsJa:["恐怖","恐れ","不安"],
+      feelings:["不安","心配","緊張","そわそわ","落ち着かない","ビクビク","恐怖"] },
+    { family:"Surprise",     ja:"驚き",   tone:"calm", color:"#46B6D9", levels:["Amazement","Surprise","Distraction"],levelsJa:["驚嘆","驚き","放心"],
+      feelings:["びっくり","驚き","戸惑い","予想外","ぼーっと","放心","驚嘆"] },
+    { family:"Sadness",      ja:"悲しみ", tone:"hard", color:"#5C7CDA", levels:["Grief","Sadness","Pensiveness"],     levelsJa:["悲嘆","悲しみ","憂い"],
+      feelings:["悲しい","寂しい","落ち込み","むなしい","泣きたい","憂い","悲嘆"] },
+    { family:"Disgust",      ja:"嫌悪",   tone:"hard", color:"#9A6FC7", levels:["Loathing","Disgust","Boredom"],      levelsJa:["強い嫌悪","嫌悪","退屈"],
+      feelings:["うんざり","モヤモヤ","げんなり","嫌悪","退屈","強い嫌悪"] },
+    { family:"Anger",        ja:"怒り",   tone:"hard", color:"#E2554C", levels:["Rage","Anger","Annoyance"],          levelsJa:["激怒","怒り","苛立ち"],
+      feelings:["イライラ","ムカつく","苛立ち","不満","怒り","激怒"] },
+    { family:"Anticipation", ja:"期待",   tone:"pos",  color:"#F0922E", levels:["Vigilance","Anticipation","Interest"],levelsJa:["警戒","期待","関心"],
+      feelings:["ワクワク","楽しみ","ドキドキ","やる気","希望","期待","関心","警戒"] }
   ];
-  const TONE_OF = {};
-  WHEEL.forEach(f => f.levels.forEach(l => TONE_OF[l] = f.tone));
+  const TONE_OF = {}, FEELING_FAMILY = {};
+  WHEEL.forEach(f => {
+    f.levels.forEach(l => TONE_OF[l] = f.tone);
+    f.feelings.forEach(x => { TONE_OF[x] = f.tone; FEELING_FAMILY[x] = f; });
+  });
 
   function polar(cx,cy,r,deg){ const a=deg*Math.PI/180; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; }
   function sectorPath(cx,cy,rIn,rOut,a0,a1){
@@ -487,7 +505,7 @@
       for(let j=0;j<3;j++){
         const d=sectorPath(cx,cy,bands[j],bands[j+1],a0,a1);
         const fill=shadeFor(fam.color,j);
-        svg+=`<path class="wedge" d="${d}" fill="${fill}" data-emotion="${fam.levels[j]}"></path>`;
+        svg+=`<path class="wedge" d="${d}" fill="${fill}" data-fam="${i}"></path>`;
       }
       for(let j=0;j<3;j++){
         const rm=(bands[j]+bands[j+1])/2, lp=polar(cx,cy,rm,angC);
@@ -500,25 +518,41 @@
     });
     svg+=`<circle cx="${cx}" cy="${cy}" r="46" fill="var(--surface)" stroke="var(--line)"></circle>`;
     $("wheel").innerHTML=svg;
-    $("wheel").querySelectorAll(".wedge").forEach(el=>el.addEventListener("click",()=>{
-      const f=el.dataset.emotion, i=entry.moods.indexOf(f);
-      if(i>=0) entry.moods.splice(i,1); else entry.moods.push(f);
-      renderMood(); autosave();
-    }));
+    $("wheel").querySelectorAll(".wedge").forEach(el=>el.addEventListener("click",()=>{ openFamily(+el.dataset.fam); }));
   })();
 
+  let openFam = null;
+  function openFamily(i){ openFam = (openFam===i) ? null : i; renderMood(); }
+  function toggleFeel(f){ const i=entry.moods.indexOf(f); if(i>=0) entry.moods.splice(i,1); else entry.moods.push(f); renderMood(); autosave(); }
+
   function renderMood(){
+    // wheel: highlight families that have a selected feeling
     $("wheel").querySelectorAll(".wedge").forEach(el=>{
-      el.classList.toggle("sel", entry.moods.indexOf(el.dataset.emotion)>=0);
+      const fam=WHEEL[+el.dataset.fam];
+      el.classList.toggle("sel", fam.feelings.some(f=>entry.moods.indexOf(f)>=0));
     });
+    // drill panel for the opened family
+    const drill=$("moodDrill");
+    if(openFam==null){ drill.innerHTML=""; }
+    else {
+      const fam=WHEEL[openFam], deep=chipColor(fam.color), mid=shadeFor(fam.color,1), ink=labelFor(mid);
+      const chips=fam.feelings.map(f=>{
+        const on=entry.moods.indexOf(f)>=0;
+        const st=on?` style="background:${mid};border-color:${mid};color:${ink}"`:"";
+        return `<span class="drill-chip" data-feel="${f}"${st}>${f}</span>`;
+      }).join("");
+      drill.innerHTML=`<div class="drill-head" style="color:${deep}">${fam.family} · ${fam.ja}</div><div class="drill-chips">${chips}</div>`;
+      drill.querySelectorAll(".drill-chip").forEach(el=>el.addEventListener("click",()=>toggleFeel(el.dataset.feel)));
+    }
+    // summary of all picked feelings
     const wrap=$("moodSel");
     wrap.innerHTML = entry.moods.map(f=>{
-      const fam=WHEEL.find(w=>w.levels.indexOf(f)>=0);
+      const fam=FEELING_FAMILY[f];
       const c=fam?chipColor(fam.color):"var(--accent-ink)";
-      return `<span class="msel" data-emotion="${f}" style="border-color:${c};color:${c};">${f}<span class="x">×</span></span>`;
+      return `<span class="msel" data-feel="${f}" style="border-color:${c};color:${c};">${f}<span class="x">×</span></span>`;
     }).join("");
     wrap.querySelectorAll(".msel").forEach(el=>el.addEventListener("click",()=>{
-      const i=entry.moods.indexOf(el.dataset.emotion); if(i>=0) entry.moods.splice(i,1);
+      const i=entry.moods.indexOf(el.dataset.feel); if(i>=0) entry.moods.splice(i,1);
       renderMood(); autosave();
     }));
   }
