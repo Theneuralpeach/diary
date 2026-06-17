@@ -22,9 +22,9 @@
     --text:#2A241E;
     --muted:#8A7F72;
     --faint:#B3A795;
-    --accent:#F2724E;
-    --accent-ink:#B5462A;
-    --accent-soft:rgba(242,114,78,.14);
+    --accent:#F2A0A8;
+    --accent-ink:#A8455A;
+    --accent-soft:rgba(242,160,168,.18);
     --good:#5E9E54;
     --good-soft:rgba(94,158,84,.14);
     --low:#5E80A6;
@@ -72,8 +72,8 @@
   .wheel-wrap{display:flex;justify-content:center;margin:8px 0 2px;}
   #wheel{width:100%;max-width:330px;height:auto;touch-action:manipulation;}
   .wedge{cursor:pointer;stroke:var(--bg);stroke-width:1.6;transition:stroke-width .1s;}
-  .wedge:active{stroke:#2A241E;}
-  .wedge.sel{stroke:#2A241E;stroke-width:2.8;}
+  .wedge:active{stroke:#FFFFFF;}
+  .wedge.sel{stroke:#FFFFFF;stroke-width:2.8;}
   .wlabel{font-size:8px;opacity:.98;pointer-events:none;font-weight:600;letter-spacing:-.2px;}
   .wlabel.lvl{font-size:6.5px;opacity:.85;font-weight:500;}
   .mood-sel{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
@@ -191,7 +191,7 @@
     background:linear-gradient(to top,var(--bg) 60%,transparent);display:flex;gap:10px;max-width:560px;margin:0 auto;
   }
   .btn{flex:1;padding:15px;border-radius:14px;border:none;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;}
-  .btn-primary{background:var(--accent);color:#FFFFFF;}
+  .btn-primary{background:var(--accent);color:#5A1E2C;}
   .btn-primary:active{transform:scale(.98);}
   .btn-ghost{flex:none;width:54px;background:var(--surface);border:1px solid var(--line);color:var(--text);font-size:18px;display:grid;place-items:center;}
   .saved-flash{
@@ -246,17 +246,17 @@
 
   <!-- mood: wheel of emotions -->
   <div class="card">
-    <div class="label">きょうの気分 · Wheel of Emotions</div>
-    <div class="hint">あてはまる気持ちをタップ（中心ほど強い／外ほどやわらか）。何個でも</div>
+    <div class="label">Today's mood · Wheel of Emotions</div>
+    <div class="hint">Tap how you feel — center = stronger, outer = softer. Pick any number.</div>
     <div class="wheel-wrap"><svg id="wheel" viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" aria-label="感情の輪"></svg></div>
     <div class="mood-sel" id="moodSel"></div>
   </div>
 
   <!-- wellness -->
   <div class="card">
-    <div class="label">体調・ウェルネス</div>
+    <div class="label">Wellness</div>
     <div class="row">
-      <div class="name">睡眠</div>
+      <div class="name">Sleep</div>
       <div class="stepper">
         <button id="sleepDown">−</button>
         <div class="val"><b id="sleepVal">—</b><span> h</span></div>
@@ -264,7 +264,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="name">エネルギー</div>
+      <div class="name">Energy</div>
       <div class="dots" id="energyDots">
         <div class="dot" data-e="1"></div>
         <div class="dot" data-e="2"></div>
@@ -277,31 +277,31 @@
 
   <!-- habits -->
   <div class="card">
-    <div class="label">習慣</div>
+    <div class="label">Habits</div>
     <div class="chips" id="habits">
-      <div class="chip" data-h="water">水 2L+</div>
+      <div class="chip" data-h="water">Water 2L+</div>
       <div class="chip" data-h="workout">Workout</div>
-      <div class="chip" data-h="out">外出</div>
-      <div class="chip" data-h="walk">散歩</div>
+      <div class="chip" data-h="out">Outing</div>
+      <div class="chip" data-h="walk">Walk</div>
       <div class="chip intimacy" data-h="intimacy">Intimacy</div>
     </div>
   </div>
 
   <!-- medication -->
   <div class="card">
-    <div class="label">服用記録</div>
+    <div class="label">Medication</div>
     <div class="toggle" id="medsToggle">
       <div class="t-left">
         <span class="t-emoji">💊</span>
         <div>
-          <div class="t-name">服用した</div>
-          <div class="t-sub">タップした事実だけ記録</div>
+          <div class="t-name">Taken</div>
+          <div class="t-sub">Records only what you tap</div>
         </div>
       </div>
       <div class="switch"></div>
     </div>
     <div class="timerow" id="medsTimeRow">
-      <div class="t-name">何時に</div>
+      <div class="t-name">Time</div>
       <input type="time" id="medsTime" />
     </div>
     <div class="medsday" id="medsDay"></div>
@@ -309,9 +309,9 @@
 
   <!-- diary -->
   <div class="card">
-    <div class="label">ひとこと日記</div>
-    <div class="hint">① 今日何した？どんな小さいことでも。「このアイデア誰かに話した」でもOK</div>
-    <textarea id="diary" placeholder="記録する。発信じゃなくて、記録。"></textarea>
+    <div class="label">Journal</div>
+    <div class="hint">① What did you do today? Anything counts — even "told someone my idea."</div>
+    <textarea id="diary" placeholder="Record it. Not to broadcast — just to record."></textarea>
   </div>
 
   <!-- surgery counter -->
@@ -369,7 +369,7 @@
     </div>
   </div>
 
-  <div class="saved-flash" id="flash">保存しました</div>
+  <div class="saved-flash" id="flash">Saved</div>
 
   <div class="savebar">
     <button class="btn btn-ghost" id="openHistory" aria-label="履歴">📅</button>
@@ -384,7 +384,7 @@
         </g>
       </svg>
     </button>
-    <button class="btn btn-primary" id="save">保存</button>
+    <button class="btn btn-primary" id="save">セーブ</button>
   </div>
 
   <!-- history sheet -->
@@ -393,17 +393,17 @@
     <div class="grabber"></div>
     <div class="cal-head">
       <button id="calPrev">‹</button>
-      <h2 id="calTitle">2026年6月</h2>
+      <h2 id="calTitle">June 2026</h2>
       <button id="calNext">›</button>
     </div>
     <div class="cal-grid" id="calDow"></div>
     <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
     <div class="cal-legend">
-      日付をタップでその日を開く<br>
-      <b class="pos">●</b> 上向き　<b class="calm">●</b> おだやか　<b class="hard">●</b> しんどい
+      Tap a day to open it<br>
+      <b class="pos">●</b> Positive　<b class="calm">●</b> Calm　<b class="hard">●</b> Heavy
     </div>
     <div class="exportrow">
-      <button class="btn-ghost2" id="exportBtn">データ書き出し (JSON)</button>
+      <button class="btn-ghost2" id="exportBtn">Export (JSON)</button>
     </div>
   </div>
 
@@ -462,6 +462,7 @@
   function shiftKey(k,delta){ const dt=keyToDate(k); dt.setDate(dt.getDate()+delta); return dayKeyFromDate(new Date(dt.getTime()+5*3600*1000)); }
 
   const DOW = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+  const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const SURGERY = "2026-02-06";
   let current = todayKey();
 
@@ -526,10 +527,10 @@
   function renderHeader(){
     const dt = keyToDate(current);
     $("dow").textContent = DOW[dt.getDay()];
-    $("dateBig").textContent = `${dt.getMonth()+1}月${dt.getDate()}日`;
+    $("dateBig").textContent = `${MON[dt.getMonth()]} ${dt.getDate()}`;
     const pill = $("todayPill");
-    if(current === todayKey()){ pill.textContent="今日"; pill.classList.add("is-today"); }
-    else { pill.textContent=dt.getFullYear()+"年"; pill.classList.remove("is-today"); }
+    if(current === todayKey()){ pill.textContent="Today"; pill.classList.add("is-today"); }
+    else { pill.textContent=dt.getFullYear(); pill.classList.remove("is-today"); }
     $("next").disabled = current >= todayKey();
     renderSurgery();
   }
@@ -549,12 +550,12 @@
     const el = $("surgeryText");
     if(days < 0){ $("surgery").style.display="none"; return; }
     $("surgery").style.display="flex";
-    if(days === 0){ el.innerHTML = "手術当日"; return; }
+    if(days === 0){ el.innerHTML = "Surgery day"; return; }
     let months = (cur.getFullYear()-sx.getFullYear())*12 + (cur.getMonth()-sx.getMonth());
     let rem = cur.getDate() - sx.getDate();
     if(rem < 0){ months--; rem += new Date(cur.getFullYear(), cur.getMonth(), 0).getDate(); }
-    const mlabel = months>0 ? `${months}ヶ月${rem>0?rem+"日":""}` : `${rem}日`;
-    el.innerHTML = `手術から <b>${days}日</b>（${mlabel}）`;
+    const mlabel = months>0 ? `${months}mo${rem>0?" "+rem+"d":""}` : `${rem}d`;
+    el.innerHTML = `<b>${days} days</b> since surgery (${mlabel})`;
   }
   function renderEntry(){
     renderMood();
@@ -565,7 +566,7 @@
     $("medsTime").value = entry.medsTime || "";
     const md=$("medsDay");
     md.classList.toggle("show", !!entry.meds);
-    if(entry.meds){ const st=medsStats(); md.textContent = st ? `Day ${st.dayN}（通算 ${st.taken}日服用）` : ""; }
+    if(entry.meds){ const st=medsStats(); md.textContent = st ? `Day ${st.dayN} · ${st.taken} day${st.taken===1?"":"s"} taken` : ""; }
     document.querySelectorAll(".chip").forEach(el=>el.classList.toggle("on", !!(entry.habits && entry.habits[el.dataset.h])));
     $("diary").value = entry.diary || "";
   }
@@ -606,7 +607,7 @@
   $("prev").addEventListener("click",()=>{ persist(); current=shiftKey(current,-1); renderAll(); });
   $("next").addEventListener("click",()=>{ if(current>=todayKey())return; persist(); current=shiftKey(current,1); renderAll(); });
 
-  function flash(msg){ const f=$("flash"); f.textContent=msg||"保存しました"; f.classList.add("show"); setTimeout(()=>f.classList.remove("show"),1200); }
+  function flash(msg){ const f=$("flash"); f.textContent=msg||"Saved"; f.classList.add("show"); setTimeout(()=>f.classList.remove("show"),1200); }
   $("save").addEventListener("click",()=>{ persist(); flash(); });
 
   // ----- calendar tone -----
@@ -630,11 +631,11 @@
   function closeSheet(){ $("sheetBg").classList.remove("show"); $("sheet").classList.remove("show"); }
   $("openHistory").addEventListener("click",openSheet);
   $("sheetBg").addEventListener("click",closeSheet);
-  (function(){ const wd=["日","月","火","水","木","金","土"]; $("calDow").innerHTML=wd.map(d=>`<div class="cal-dow">${d}</div>`).join(""); })();
+  (function(){ const wd=["S","M","T","W","T","F","S"]; $("calDow").innerHTML=wd.map(d=>`<div class="cal-dow">${d}</div>`).join(""); })();
 
   function renderCal(){
     const y=calRef.getFullYear(), m=calRef.getMonth();
-    $("calTitle").textContent=`${y}年${m+1}月`;
+    $("calTitle").textContent=`${MON[m]} ${y}`;
     const first=new Date(y,m,1).getDay();
     const days=new Date(y,m+1,0).getDate();
     let html="";
@@ -665,7 +666,7 @@
 
   // ----- send to Notion (reuse briefing app's existing endpoint + passphrase) -----
   const NOTES_API = "https://briefing.theneuralpeach.deno.net";
-  const HABIT_NAMES = {water:"水2L+",workout:"Workout",out:"外出",walk:"散歩",intimacy:"Intimacy"};
+  const HABIT_NAMES = {water:"Water 2L+",workout:"Workout",out:"Outing",walk:"Walk",intimacy:"Intimacy"};
   function composeNote(k,e){
     const L=["【Daily】"+k];
     if(e.moods&&e.moods.length){
@@ -684,25 +685,25 @@
   }
   function getSecret(){
     let s=localStorage.getItem("bpass");
-    if(!s){ s=prompt("Notion送信の合言葉（briefingアプリと同じ）"); if(s) localStorage.setItem("bpass",s); }
+    if(!s){ s=prompt("Notion passphrase (same as the briefing app)"); if(s) localStorage.setItem("bpass",s); }
     return s;
   }
   function sendToNotion(){
     persist();
     const e=getEntry(current);
     const has=e.moods.length||e.sleep!=null||e.energy||e.meds||e.diary||Object.values(e.habits||{}).some(Boolean);
-    if(!has){ flash("この日は記録がないよ"); return; }
+    if(!has){ flash("Nothing recorded yet"); return; }
     const secret=getSecret();
-    if(!secret){ flash("合言葉が必要だよ"); return; }
-    flash("送信中…");
+    if(!secret){ flash("Passphrase needed"); return; }
+    flash("Sending…");
     fetch(NOTES_API,{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({note:composeNote(current,e),kind:"diary",secret:secret})})
       .then(r=>{
-        if(r.ok){ flash("Notionに送ったよ ✓"); }
-        else if(r.status===401||r.status===403){ localStorage.removeItem("bpass"); flash("合言葉が違うかも"); }
-        else { flash("送信エラー("+r.status+")"); }
+        if(r.ok){ flash("Sent to Notion ✓"); }
+        else if(r.status===401||r.status===403){ localStorage.removeItem("bpass"); flash("Wrong passphrase?"); }
+        else { flash("Send error ("+r.status+")"); }
       })
-      .catch(()=>flash("送信失敗（オフライン？）"));
+      .catch(()=>flash("Send failed (offline?)"));
   }
   $("sendNotion").addEventListener("click",sendToNotion);
 
