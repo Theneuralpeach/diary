@@ -192,7 +192,7 @@
   .btn{flex:1;padding:15px;border-radius:14px;border:none;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;}
   .btn-primary{background:var(--accent);color:#1b1306;}
   .btn-primary:active{transform:scale(.98);}
-  .btn-ghost{flex:none;width:54px;background:var(--surface);border:1px solid var(--line);color:var(--text);font-size:18px;}
+  .btn-ghost{flex:none;width:54px;background:var(--surface);border:1px solid var(--line);color:var(--text);font-size:18px;display:grid;place-items:center;}
   .saved-flash{
     position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:var(--good);color:#0f1c0a;
     padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;transition:.3s;pointer-events:none;z-index:50;
@@ -372,7 +372,17 @@
 
   <div class="savebar">
     <button class="btn btn-ghost" id="openHistory" aria-label="履歴">📅</button>
-    <button class="btn btn-ghost" id="sendNotion" aria-label="Notionに送る">☁</button>
+    <button class="btn btn-ghost" id="sendNotion" aria-label="Notionに送る（記録を太陽に放つ）">
+      <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.3" fill="var(--accent)"/>
+        <g stroke="var(--accent)" stroke-width="2.1" stroke-linecap="round">
+          <line x1="12" y1="2.2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.8"/>
+          <line x1="2.2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.8" y2="12"/>
+          <line x1="5.0" y1="5.0" x2="7.0" y2="7.0"/><line x1="17.0" y1="17.0" x2="19.0" y2="19.0"/>
+          <line x1="5.0" y1="19.0" x2="7.0" y2="17.0"/><line x1="17.0" y1="7.0" x2="19.0" y2="5.0"/>
+        </g>
+      </svg>
+    </button>
     <button class="btn btn-primary" id="save">保存</button>
   </div>
 
