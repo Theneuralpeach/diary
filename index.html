@@ -445,6 +445,18 @@
     f.feelings.forEach(x => { TONE_OF[x] = f.tone; FEELING_FAMILY[x] = f; });
   });
 
+  // English feeling → Japanese (for the glossary)
+  const FEEL_JA = {
+    "Happy":"幸せ","Joyful":"喜び","Cheerful":"上機嫌","Content":"満ち足りた","Delighted":"大喜び","Grateful":"感謝","Blissful":"至福","Elated":"有頂天","Playful":"遊び心","Lucky":"幸運","Calm":"穏やか","Peaceful":"平和","Serene":"安らか","Satisfied":"満足","Proud":"誇らしい","Radiant":"輝いてる","Cozy":"居心地いい","Free":"自由","Lighthearted":"軽やか","Ecstatic":"恍惚",
+    "Loved":"愛されてる","Affectionate":"愛情深い","Warm":"あたたかい","Tender":"やさしい","Trusting":"信頼してる","Safe":"安全","Secure":"安心","Connected":"つながってる","Accepted":"受け入れられてる","Supported":"支えられてる","Cherished":"大切にされてる","Close":"親密","Devoted":"一途","Admiring":"敬愛","Respected":"尊重されてる","Open":"心を開いてる","Bonded":"絆を感じる","Smitten":"夢中","Butterflies":"ときめき","Comforted":"慰められた",
+    "Anxious":"不安","Worried":"心配","Nervous":"緊張","Scared":"怖い","Afraid":"おびえ","Tense":"張りつめた","Insecure":"自信がない","Overwhelmed":"いっぱいいっぱい","Stressed":"ストレス","Panicked":"パニック","Restless":"落ち着かない","Jittery":"そわそわ","Apprehensive":"気がかり","Dread":"恐怖","Helpless":"無力感","Threatened":"脅かされてる","Shaky":"震える","On edge":"ピリピリ","Frightened":"怯えた","Timid":"臆病",
+    "Surprised":"驚き","Amazed":"驚嘆","Astonished":"仰天","Startled":"はっとした","Shocked":"ショック","Stunned":"唖然","Confused":"混乱","Bewildered":"当惑","Speechless":"言葉を失う","Dazed":"ぼうぜん","Spaced-out":"ぼーっと","Wonder":"不思議","Awe":"畏敬","Disoriented":"方向感覚を失う","Unsettled":"落ち着かない","Intrigued":"興味津々","Puzzled":"戸惑い","Caught off guard":"不意打ち","Flustered":"うろたえ","Rattled":"動揺",
+    "Sad":"悲しい","Lonely":"寂しい","Down":"落ち込み","Blue":"憂うつ","Heartbroken":"傷心","Hurt":"傷ついた","Disappointed":"がっかり","Empty":"むなしい","Hopeless":"絶望","Grieving":"深い悲しみ","Tearful":"泣きそう","Melancholy":"もの悲しい","Gloomy":"暗い気分","Discouraged":"落胆","Drained":"消耗","Numb":"無感覚","Vulnerable":"傷つきやすい","Regretful":"後悔","Homesick":"ホームシック","Wistful":"切ない",
+    "Disgusted":"嫌悪","Repulsed":"強い拒否感","Grossed out":"気持ち悪い","Uncomfortable":"不快","Bored":"退屈","Sick of it":"うんざり","Judgmental":"批判的","Disapproving":"不賛成","Contempt":"軽蔑","Averse":"避けたい","Turned off":"冷める","Uneasy":"落ち着かない","Distaste":"嫌気","Reluctant":"気が進まない","Withdrawn":"引きこもり気味","Detached":"よそよそしい","Cynical":"冷笑的","Jaded":"擦れた","Indifferent":"無関心","Put off":"げんなり",
+    "Angry":"怒り","Frustrated":"イライラ","Irritated":"いらだち","Annoyed":"不快","Mad":"激おこ","Furious":"激怒","Resentful":"恨み","Bitter":"苦々しい","Agitated":"動揺","Impatient":"せっかち","Defensive":"身構える","Jealous":"嫉妬","Envious":"うらやみ","Indignant":"憤慨","Grumpy":"不機嫌","Hostile":"敵意","Fed up":"うんざり","Snappy":"とげとげ","Pissed off":"ムカつく","Outraged":"激高",
+    "Excited":"ワクワク","Eager":"意欲的","Hopeful":"希望","Curious":"好奇心","Inspired":"刺激を受けた","Motivated":"やる気","Energized":"元気いっぱい","Optimistic":"楽観的","Thrilled":"大興奮","Determined":"決意","Focused":"集中","Driven":"突き動かされる","Interested":"興味","Keen":"熱心","Adventurous":"冒険心","Pumped":"気合い","Giddy":"浮き立つ","Ambitious":"野心的","Alert":"注意深い","Vigilant":"警戒"
+  };
+
   function polar(cx,cy,r,deg){ const a=deg*Math.PI/180; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; }
   function sectorPath(cx,cy,rIn,rOut,a0,a1){
     const p0=polar(cx,cy,rOut,a0),p1=polar(cx,cy,rOut,a1),p2=polar(cx,cy,rIn,a1),p3=polar(cx,cy,rIn,a0);
@@ -755,7 +767,7 @@
   // ----- emotion glossary (EN -> JA) -----
   (function buildGlossary(){
     $("glossList").innerHTML = WHEEL.map(f=>{
-      const lv = f.levels.map((l,i)=>`<b>${l}</b> ${f.levelsJa[i]}`).join('<span class="sep">·</span>');
+      const lv = f.feelings.map(x=>`<b>${x}</b> ${FEEL_JA[x]||""}`).join('<span class="sep">·</span>');
       return `<div class="gloss-fam"><span class="sw" style="background:${f.color}"></span>`+
              `<span class="g-en">${f.family}</span><span class="g-ja">${f.ja}</span></div>`+
              `<div class="gloss-lvls">${lv}</div>`;
