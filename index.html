@@ -114,8 +114,12 @@
   .chip:active{transform:scale(.94);}
   .chip.on{background:var(--accent-soft);border-color:var(--accent-ink);color:var(--text);}
   .chip.on::before{content:"✓";color:var(--accent-ink);font-size:12px;}
-  .chip.intimacy.on{background:rgba(216,107,124,.16);border-color:var(--intimacy);}
-  .chip.intimacy.on::before{color:var(--intimacy);}
+  .intimacy-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+  .i-label{font-size:15px;}
+  .i-hearts{display:flex;gap:8px;}
+  .ih{font-size:26px;line-height:1;cursor:pointer;color:var(--line);transition:.12s;}
+  .ih.on{color:var(--intimacy);}
+  .ih:active{transform:scale(.82);}
 
   /* ---------- meds ---------- */
   .toggle{
@@ -288,9 +292,17 @@
     <div class="chips" id="habits">
       <div class="chip" data-h="water">Water 2L+</div>
       <div class="chip" data-h="workout">Workout</div>
-      <div class="chip" data-h="out">Outing</div>
       <div class="chip" data-h="walk">Walk</div>
-      <div class="chip intimacy" data-h="intimacy">Intimacy</div>
+      <div class="chip" data-h="stepout">Step Outside</div>
+      <div class="chip" data-h="home">Stayed home</div>
+      <div class="chip" data-h="people">Saw someone</div>
+    </div>
+    <div class="intimacy-row" id="intimacyRow">
+      <span class="i-label">💕 Intimacy</span>
+      <div class="i-hearts" id="iHearts">
+        <span class="ih" data-h="1">♥</span>
+        <span class="ih" data-h="2">♥</span>
+      </div>
     </div>
   </div>
 
@@ -497,11 +509,12 @@
   let current = todayKey();
 
   // ----- entry model -----
-  function blank(){ return {moods:[],sleep:null,energy:null,meds:false,medsTime:"",habits:{},diary:""}; }
+  function blank(){ return {moods:[],sleep:null,energy:null,meds:false,medsTime:"",habits:{},intimacy:0,diary:""}; }
   function getEntry(k){
     const e = Object.assign(blank(), store[k]||{});
     if(!Array.isArray(e.moods)) e.moods = [];
     if(!e.habits) e.habits = {};
+    if(typeof e.intimacy !== "number") e.intimacy = 0;
     return e;
   }
   let entry = getEntry(current);
@@ -614,13 +627,14 @@
     md.classList.toggle("show", !!entry.meds);
     if(entry.meds){ const st=medsStats(); md.textContent = st ? `Day ${st.dayN} · ${st.taken} day${st.taken===1?"":"s"} taken` : ""; }
     document.querySelectorAll(".chip").forEach(el=>el.classList.toggle("on", !!(entry.habits && entry.habits[el.dataset.h])));
+    document.querySelectorAll("#iHearts .ih").forEach(el=>el.classList.toggle("on", entry.intimacy >= +el.dataset.h));
     $("diary").value = entry.diary || "";
   }
   function renderAll(){ entry = getEntry(current); renderHeader(); renderEntry(); }
 
   // ----- persist -----
   function hasContent(){
-    return entry.moods.length || entry.sleep!=null || entry.energy || entry.meds ||
+    return entry.moods.length || entry.sleep!=null || entry.energy || entry.meds || entry.intimacy ||
       entry.diary || Object.values(entry.habits||{}).some(Boolean);
   }
   function persist(){
@@ -647,6 +661,9 @@
   $("medsTime").addEventListener("input",()=>{ entry.medsTime=$("medsTime").value; autosave(); });
   document.querySelectorAll(".chip").forEach(el=>el.addEventListener("click",()=>{
     entry.habits=entry.habits||{}; const h=el.dataset.h; entry.habits[h]=!entry.habits[h]; renderEntry(); autosave();
+  }));
+  document.querySelectorAll("#iHearts .ih").forEach(el=>el.addEventListener("click",()=>{
+    const h=+el.dataset.h; entry.intimacy = (entry.intimacy===h) ? h-1 : h; renderEntry(); autosave();
   }));
   $("diary").addEventListener("input",()=>{ entry.diary=$("diary").value; autosave(); });
 
@@ -712,7 +729,7 @@
 
   // ----- send to Notion (reuse briefing app's existing endpoint + passphrase) -----
   const NOTES_API = "https://briefing.theneuralpeach.deno.net";
-  const HABIT_NAMES = {water:"Water 2L+",workout:"Workout",out:"Outing",walk:"Walk",intimacy:"Intimacy"};
+  const HABIT_NAMES = {water:"Water 2L+",workout:"Workout",walk:"Walk",stepout:"Step Outside",home:"Stayed home",people:"Saw someone"};
   function composeNote(k,e){
     const L=["【Daily】"+k];
     if(e.moods&&e.moods.length){
@@ -725,6 +742,7 @@
     if(wl.length) L.push(wl.join(" ・ "));
     const hs=Object.keys(e.habits||{}).filter(h=>e.habits[h]).map(h=>HABIT_NAMES[h]||h);
     if(hs.length) L.push("習慣: "+hs.join(" / "));
+    if(e.intimacy>0) L.push("Intimacy: "+"♥".repeat(e.intimacy));
     if(e.meds){ const st=medsStats(); L.push("服用: "+(e.medsTime?e.medsTime+" ":"")+"服用した"+(st?`（Day ${st.dayN}/通算${st.taken}日）`:"")); }
     if(e.diary) L.push("日記: "+e.diary);
     return L.join("\n");
@@ -737,7 +755,7 @@
   function sendToNotion(){
     persist();
     const e=getEntry(current);
-    const has=e.moods.length||e.sleep!=null||e.energy||e.meds||e.diary||Object.values(e.habits||{}).some(Boolean);
+    const has=e.moods.length||e.sleep!=null||e.energy||e.meds||e.intimacy||e.diary||Object.values(e.habits||{}).some(Boolean);
     if(!has){ flash("Nothing recorded yet"); return; }
     const secret=getSecret();
     if(!secret){ flash("Passphrase needed"); return; }
