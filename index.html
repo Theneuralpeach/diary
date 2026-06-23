@@ -120,6 +120,10 @@
   .ih{font-size:26px;line-height:1;cursor:pointer;color:var(--line);transition:.12s;}
   .ih.on{color:var(--intimacy);}
   .ih:active{transform:scale(.82);}
+  .seg{display:flex;gap:8px;}
+  .seg-opt{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);font-size:14px;cursor:pointer;transition:.12s;}
+  .seg-opt.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);}
+  .seg-opt:active{transform:scale(.93);}
 
   /* ---------- meds ---------- */
   .toggle{
@@ -297,8 +301,15 @@
       <div class="chip" data-h="home">Stayed home</div>
       <div class="chip" data-h="people">Saw someone</div>
     </div>
+    <div class="intimacy-row" id="sleptRow">
+      <span class="i-label">🛏 Last night</span>
+      <div class="seg" id="sleptSeg">
+        <span class="seg-opt" data-s="alone">Alone</span>
+        <span class="seg-opt" data-s="together">Together</span>
+      </div>
+    </div>
     <div class="intimacy-row" id="intimacyRow">
-      <span class="i-label">💕 Intimacy</span>
+      <span class="i-label" aria-label="intimacy"></span>
       <div class="i-hearts" id="iHearts">
         <span class="ih" data-h="1">♥</span>
         <span class="ih" data-h="2">♥</span>
@@ -509,7 +520,7 @@
   let current = todayKey();
 
   // ----- entry model -----
-  function blank(){ return {moods:[],sleep:null,energy:null,meds:false,medsTime:"",habits:{},intimacy:0,diary:""}; }
+  function blank(){ return {moods:[],sleep:null,energy:null,meds:false,medsTime:"",habits:{},intimacy:0,sleptWith:null,diary:""}; }
   function getEntry(k){
     const e = Object.assign(blank(), store[k]||{});
     if(!Array.isArray(e.moods)) e.moods = [];
@@ -630,13 +641,14 @@
     if(entry.meds){ const st=medsStats(); md.textContent = st ? `Day ${st.dayN} · ${st.taken} day${st.taken===1?"":"s"} taken` : ""; }
     document.querySelectorAll(".chip").forEach(el=>el.classList.toggle("on", !!(entry.habits && entry.habits[el.dataset.h])));
     document.querySelectorAll("#iHearts .ih").forEach(el=>el.classList.toggle("on", entry.intimacy >= +el.dataset.h));
+    document.querySelectorAll("#sleptSeg .seg-opt").forEach(el=>el.classList.toggle("on", entry.sleptWith===el.dataset.s));
     $("diary").value = entry.diary || "";
   }
   function renderAll(){ entry = getEntry(current); renderHeader(); renderEntry(); }
 
   // ----- persist -----
   function hasContent(){
-    return entry.moods.length || entry.sleep!=null || entry.energy || entry.meds || entry.intimacy ||
+    return entry.moods.length || entry.sleep!=null || entry.energy || entry.meds || entry.intimacy || entry.sleptWith ||
       entry.diary || Object.values(entry.habits||{}).some(Boolean);
   }
   function persist(){
@@ -666,6 +678,9 @@
   }));
   document.querySelectorAll("#iHearts .ih").forEach(el=>el.addEventListener("click",()=>{
     const h=+el.dataset.h; entry.intimacy = (entry.intimacy===h) ? h-1 : h; renderEntry(); autosave();
+  }));
+  document.querySelectorAll("#sleptSeg .seg-opt").forEach(el=>el.addEventListener("click",()=>{
+    const s=el.dataset.s; entry.sleptWith = (entry.sleptWith===s) ? null : s; renderEntry(); autosave();
   }));
   $("diary").addEventListener("input",()=>{ entry.diary=$("diary").value; autosave(); });
 
@@ -744,6 +759,7 @@
     if(wl.length) L.push(wl.join(" ・ "));
     const hs=Object.keys(e.habits||{}).filter(h=>e.habits[h]).map(h=>HABIT_NAMES[h]||h);
     if(hs.length) L.push("習慣: "+hs.join(" / "));
+    if(e.sleptWith) L.push("Slept: "+(e.sleptWith==="together"?"誰かと":"一人"));
     if(e.intimacy>0) L.push("Intimacy: "+"♥".repeat(e.intimacy));
     if(e.meds){ const st=medsStats(); L.push("服用: "+(e.medsTime?e.medsTime+" ":"")+"服用した"+(st?`（Day ${st.dayN}/通算${st.taken}日）`:"")); }
     if(e.diary) L.push("日記: "+e.diary);
@@ -757,7 +773,7 @@
   function sendToNotion(){
     persist();
     const e=getEntry(current);
-    const has=e.moods.length||e.sleep!=null||e.energy||e.meds||e.intimacy||e.diary||Object.values(e.habits||{}).some(Boolean);
+    const has=e.moods.length||e.sleep!=null||e.energy||e.meds||e.intimacy||e.sleptWith||e.diary||Object.values(e.habits||{}).some(Boolean);
     if(!has){ flash("Nothing recorded yet"); return; }
     const secret=getSecret();
     if(!secret){ flash("Passphrase needed"); return; }
