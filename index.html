@@ -593,14 +593,16 @@
     $("next").disabled = current >= todayKey();
     renderSurgery();
   }
-  // counts ONLY actual recorded doses (her taps) up to & including the viewed day — never invents a schedule
+  // Day N = real isotretinoin course day, counted from the actual start (2026-05-08, confirmed in Obsidian dose log).
+  // taken = actual recorded doses (her taps in this app) up to & including the viewed day — never invents a schedule.
+  const ISOTRET_START = "2026-05-08";
   function medsStats(){
     const keys=[];
     for(const k in store){ if(k!==current && k<=current && store[k] && store[k].meds) keys.push(k); }
     if(entry.meds) keys.push(current);
     if(!keys.length) return null;
     keys.sort();
-    const dayN = Math.round((keyToDate(current)-keyToDate(keys[0]))/86400000)+1;
+    const dayN = Math.round((keyToDate(current)-keyToDate(ISOTRET_START))/86400000)+1;
     return {dayN, taken:keys.length, start:keys[0]};
   }
   function renderSurgery(){
