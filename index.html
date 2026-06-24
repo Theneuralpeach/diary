@@ -240,6 +240,9 @@
   .cal-cell .m.pos{background:var(--good);}
   .cal-cell .m.calm{background:var(--accent);}
   .cal-cell .m.hard{background:var(--low);}
+  .cal-cell .cmark{display:flex;align-items:center;justify-content:center;gap:2px;min-height:11px;line-height:1;}
+  .cal-cell .ch{color:var(--intimacy);font-size:9px;letter-spacing:-1px;}
+  .cal-cell .cm-emo{font-size:10px;}
   .cal-legend{margin-top:14px;font-size:11px;color:var(--faint);text-align:center;line-height:1.7;}
   .cal-legend b.pos{color:var(--good);}
   .cal-legend b.calm{color:var(--accent-ink);}
@@ -438,7 +441,8 @@
     <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
     <div class="cal-legend">
       Tap a day to open it<br>
-      <b class="pos">●</b> Positive　<b class="calm">●</b> Calm　<b class="hard">●</b> Heavy
+      <b class="pos">●</b> Positive　<b class="calm">●</b> Calm　<b class="hard">●</b> Heavy<br>
+      <span style="color:var(--intimacy)">♥</span> intimacy　😊 home all day
     </div>
     <div class="exportrow">
       <button class="btn-ghost2" id="exportBtn">Export (JSON)</button>
@@ -743,7 +747,13 @@
       const e=store[k];
       const isToday = k===todayKey();
       const tone = entryTone(e);
-      const mark = tone ? `<div class="m ${tone}"></div>` : (e?`<div class="m calm" style="opacity:.4"></div>`:"");
+      const dot = tone ? `<span class="m ${tone}"></span>` : (e?`<span class="m calm" style="opacity:.4"></span>`:"");
+      let extra = "";
+      if(e){
+        if(e.dayOut==="home") extra += `<span class="cm-emo">😊</span>`;
+        if(e.intimacy>0) extra += `<span class="ch">${"♥".repeat(e.intimacy)}</span>`;
+      }
+      const mark = (dot||extra) ? `<div class="cmark">${dot}${extra}</div>` : "";
       html+=`<div class="cal-cell ${e?'has':''} ${isToday?'is-today':''}" data-k="${k}">
         <div class="d">${d}</div>${mark}</div>`;
     }
